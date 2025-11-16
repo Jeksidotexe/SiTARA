@@ -135,32 +135,16 @@
                         <span class="nav-link-text ms-1 text-wrap">Laporan Bulanan Semua Wilayah</span>
                     </a>
                 </li>
-                <li class="nav-item {{ request()->routeIs('rekapitulasi.bulanan') ? 'active' : '' }}">
-                    <a
-                        class="nav-link {{ request()->routeIs('rekapitulasi.bulanan') ? 'active bg-gradient-dark text-white' : 'text-dark' }}"
-                        href="{{ route('rekapitulasi.bulanan') }}">
-                        <div
-                            class="text-center me-2 d-flex align-items-center justify-content-center">
+                <li class="nav-item {{ request()->routeIs('rekapitulasi.laporan') ? 'active' : '' }}">
+                    <a class="nav-link {{ request()->routeIs('rekapitulasi.laporan') ? 'active bg-gradient-dark text-white' : 'text-dark' }}"
+                        href="{{ route('rekapitulasi.laporan') }}">
+                        <div class="text-center me-2 d-flex align-items-center justify-content-center">
                             <i class="material-symbols-rounded opacity-5">summarize</i>
-                            </div>
+                        </div>
                         <span class="nav-link-text ms-1 text-wrap">Rekapitulasi Laporan
-                            Bulanan</span>
-                        </a>
-                    </li>
-
-                <li class="nav-item {{ request()->routeIs('rekapitulasi.puskomin') ? 'active' : '' }}">
-                    <a
-                        class="nav-link {{ request()->routeIs('rekapitulasi.puskomin') ? 'active bg-gradient-dark text-white' : 'text-dark' }}"
-                        href="{{ route('rekapitulasi.puskomin') }}">
-                        <div
-                            class="text-center me-2 d-flex align-items-center justify-content-center">
-                            <i
-                                class="material-symbols-rounded opacity-5">breaking_news_alt_1</i>
-                            </div>
-                        <span class="nav-link-text ms-1 text-wrap">Rekapitulasi Laporan
-                            Puskomin</span>
-                        </a>
-                    </li>
+                            Bulanan & Puskomin</span>
+                    </a>
+                </li>
                 <li class="nav-item mt-3">
                     <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Akun</h6>
                 </li>
