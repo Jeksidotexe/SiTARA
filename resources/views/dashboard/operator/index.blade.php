@@ -23,6 +23,8 @@
                                 <span class="text-sm font-weight-light text-muted ms-1">Laporan</span>
                             </h5>
                         </div>
+                        <hr class="dark horizontal my-2">
+                        <p class="mb-0 pt-1 text-sm text-secondary">Semua tipe laporan.</p>
                     </div>
                     <div class="col-4 text-end">
                         <div class="icon icon-md icon-shape bg-gradient-dark shadow text-center border-radius-lg">
@@ -41,6 +43,8 @@
                                 <span class="text-sm font-weight-light text-muted ms-1">Laporan</span>
                             </h5>
                         </div>
+                        <hr class="dark horizontal my-2">
+                        <p class="mb-0 pt-1 text-sm text-secondary">Laporan menunggu verifikasi.</p>
                     </div>
                     <div class="col-4 text-end">
                         <div class="icon icon-md icon-shape bg-gradient-dark shadow text-center border-radius-lg">
@@ -180,8 +184,7 @@
                                     <div class="ms-auto text-end d-flex align-items-center">
                                         <a class="btn btn-success bg-gradient-success btn-sm px-2 py-1 mb-0 mx-2"
                                             href="{{ $showUrl }}">
-                                            <i
-                                                class="material-symbols-rounded text-sm position-relative">visibility</i>
+                                            <i class="material-symbols-rounded text-sm position-relative">visibility</i>
                                             Detail
                                         </a>
                                         <a class="btn btn-warning bg-gradient-warning text-dark btn-sm px-2 py-1 mb-0"
