@@ -1,0 +1,195 @@
+.card-body .form-control {
+    padding: 0.325rem 1rem !important;
+}
+
+.card-body .form-select {
+    padding: 0.325rem 1rem !important;
+}
+
+.select2-container--bootstrap-5.select2-container--focus .select2-selection,
+.select2-container--bootstrap-5.select2-container--open .select2-selection {
+    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.3) !important;
+    border-color: #262626;
+}
+
+.toast-header {
+    background-image: linear-gradient(to right,
+            transparent 0%,
+            rgba(0, 0, 0, 0.08) 20%,
+            rgba(0, 0, 0, 0.08) 80%,
+            transparent 100%);
+    background-size: 95% 1px;
+    background-position: bottom;
+    background-repeat: no-repeat;
+}
+
+.custom-file-upload-header-container {
+    background-color: #F8F9FA;
+    padding: 1.5rem;
+    border-radius: 0.5rem 0.5rem 0 0;
+    /* Rounded corners only on top */
+    border: 1px solid #dee2e6;
+    border-bottom: none;
+    /* Hilangkan border bawah */
+}
+
+.custom-file-upload-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    /* Hapus margin bawah jika tidak diperlukan */
+}
+
+.custom-file-upload-header .text-content h6 {
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+    color: #344767;
+}
+
+.custom-file-upload-header .text-content p {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-bottom: 0;
+    max-width: 400px;
+}
+
+.custom-file-upload-btn i {
+    font-size: 1rem;
+    line-height: 1;
+    position: relative;
+    top: -1px;
+}
+
+.custom-file-upload-btn.upload-success {
+    background-color: #e9ecef;
+    color: #6c757d;
+    cursor: default;
+}
+
+.custom-file-upload-btn.upload-success:hover {
+    background-color: #e9ecef;
+    color: #6c757d;
+}
+
+/* === BAGIAN BARU: Footer (Info, Detail, Preview) === */
+.custom-file-upload-footer-container {
+    background-color: #FFFFFF;
+    /* Background putih agar berbeda */
+    padding: 1rem 1.5rem 1.5rem 1.5rem;
+    /* Sesuaikan padding */
+    border-radius: 0 0 0.5rem 0.5rem;
+    /* Rounded corners only on bottom */
+    border: 1px solid #dee2e6;
+    border-top: none;
+    /* Hilangkan border atas */
+    margin-bottom: 1rem;
+    /* Margin bawah untuk keseluruhan blok */
+}
+
+.custom-file-upload-info {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-bottom: 1rem;
+    /* Jarak ke detail file atau preview */
+}
+
+/* Detail File yang Diupload (styling sama seperti sebelumnya) */
+.uploaded-file-details {
+    display: flex;
+    align-items: center;
+    background-color: #FFFFFF;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    /* Jarak ke preview jika ada */
+}
+
+/* Sembunyikan jika tidak ada file */
+.uploaded-file-details:not(.has-file) {
+    display: none;
+}
+
+
+.file-preview-icon {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    margin-right: 1rem;
+    flex-shrink: 0;
+}
+
+.file-details-info {
+    flex-grow: 1;
+    font-size: 0.875rem;
+    color: #495057;
+    line-height: 1.5;
+    overflow: hidden;
+}
+
+.file-details-info p {
+    margin-bottom: 0.1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.file-details-info p strong {
+    color: #343A40;
+}
+
+.file-action-buttons {
+    margin-left: 1rem;
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.file-action-buttons .btn-action {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    color: #6c757d;
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.375rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.file-action-buttons .btn-action i {
+    font-size: 1rem;
+}
+
+.file-action-buttons .btn-action:hover {
+    background-color: #e9ecef;
+    border-color: #ced4da;
+    color: #495057;
+}
+
+.file-action-buttons .btn-delete {
+    background-color: #fdf0f0;
+    border-color: #fbd9db;
+    color: #dc3545;
+}
+
+.file-action-buttons .btn-delete:hover {
+    background-color: #f8d7da;
+    border-color: #f5c2c7;
+    color: #b02a37;
+}
+
+/* Preview Gambar (jika ada file gambar) */
+#foto-preview-wrapper {
+    margin-top: 1rem;
+    /* Jarak dari detail file atau info */
+    border-top: 1px dashed #dee2e6;
+    /* Garis pemisah opsional */
+    padding-top: 1rem;
+    /* Jarak dari garis pemisah */
+}
+
+/* Sembunyikan jika tidak ada file gambar */
+#foto-preview-wrapper:not(.has-image-preview) {
+    display: none;
+}
