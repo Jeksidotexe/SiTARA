@@ -9,6 +9,4 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-// [LANGKAH 2] Tambahkan penjadwalan Anda di sini
-// Ini adalah pengganti dari Kernel.php
 Schedule::command(CheckWilayahStatus::class)->hourly();

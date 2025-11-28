@@ -4,9 +4,9 @@
         <i class="fas fa-times p-3 cursor-pointer opacity-5 position-absolute end-0 top-0 d-none d-xl-none"
             aria-hidden="true" id="iconSidenav"></i>
         <a class="navbar-brand px-4 py-3 m-0" href="{{ route('dashboard') }}">
-            <img src="{{ asset('images/Logo.png') }}" class="navbar-brand-img" width="auto"
-                height="26" alt="main_logo">
-            <span class="ms-1 text-sm font-weight-bold">SIMANTEL</span>
+            <img src="{{ asset('images/Logo.png') }}" class="navbar-brand-img" width="auto" height="26"
+                alt="main_logo">
+            <span class="ms-1 text-sm font-weight-bold">SITARA</span>
         </a>
     </div>
     <hr class="horizontal dark mt-0 mb-2">
@@ -26,11 +26,15 @@
 
             {{-- === MENU KHUSUS PIMPINAN === --}}
             @if (Auth::user()->role == 'pimpinan')
+                @inject('pendingCountService', 'App\Services\VerificationService')
+                @php
+                    $pimpinanPendingCount = $pendingCountService->getPendingCount();
+                @endphp
+
                 <li class="nav-item mt-3">
                     <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Verifikasi
-                        Laporan</h6> {{-- Opacity lebih jelas --}}
+                        Laporan</h6>
                 </li>
-                {{-- Contoh Route: verifikasi.pending --}}
                 <li class="nav-item {{ request()->routeIs('verifikasi.pending*') ? 'active' : '' }}">
                     <a class="nav-link {{ request()->routeIs('verifikasi.pending*') ? 'active bg-gradient-dark text-white' : 'text-dark' }}"
                         href="{{ route('verifikasi.pending') }}">
@@ -38,12 +42,12 @@
                             <i class="material-symbols-rounded opacity-5">pending_actions</i>
                         </div>
                         <span class="nav-link-text ms-1">Menunggu Verifikasi</span>
-                        {{-- Tambahkan badge jumlah pending jika diinginkan --}}
-                        {{-- @inject('pendingCount', 'App\Services\VerificationService') --}}
-                        {{-- <span class="badge bg-gradient-info ms-auto me-3">{{ $pendingCount->getPendingCount() }}</span> --}}
+                        <span id="sidebar-pending-badge" class="badge bg-gradient-info ms-1 me-5"
+                            style="{{ $pimpinanPendingCount > 0 ? '' : 'display: none;' }}">
+                            <span id="sidebar-pending-count">{{ $pimpinanPendingCount }}</span>
+                        </span>
                     </a>
                 </li>
-                {{-- Contoh Route: verifikasi.history --}}
                 <li class="nav-item {{ request()->routeIs('verifikasi.history*') ? 'active' : '' }}">
                     <a class="nav-link {{ request()->routeIs('verifikasi.history*') ? 'active bg-gradient-dark text-white' : 'text-dark' }}"
                         href="{{ route('verifikasi.history') }}">
@@ -113,18 +117,6 @@
                 <li class="nav-item mt-3">
                     <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Data Master</h6>
                 </li>
-                <li class="nav-item {{ request()->routeIs('wilayah.*') ? 'active' : '' }}">
-                    <a class="nav-link {{ request()->routeIs('wilayah.*') ? 'active bg-gradient-dark text-white' : 'text-dark' }}"
-                        href="{{ route('wilayah.index') }}">
-                        <div class="text-center me-2 d-flex align-items-center justify-content-center">
-                            <i class="material-symbols-rounded opacity-5">map</i>
-                        </div>
-                        <span class="nav-link-text ms-1">Daftar Wilayah</span>
-                    </a>
-                </li>
-                <li class="nav-item mt-3">
-                    <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Laporan</h6>
-                </li>
                 <li class="nav-item {{ request()->routeIs('laporan-bulanan.*') ? 'active' : '' }}">
                     <a class="nav-link {{ request()->routeIs('laporan-bulanan.*') ? 'active bg-gradient-dark text-white' : 'text-dark' }}"
                         href="{{ route('laporan-bulanan.index') }}">
@@ -142,6 +134,15 @@
                         </div>
                         <span class="nav-link-text ms-1 text-wrap">Rekapitulasi Laporan
                             Bulanan & Puskomin</span>
+                    </a>
+                </li>
+                <li class="nav-item {{ request()->routeIs('wilayah.*') ? 'active' : '' }}">
+                    <a class="nav-link {{ request()->routeIs('wilayah.*') ? 'active bg-gradient-dark text-white' : 'text-dark' }}"
+                        href="{{ route('wilayah.index') }}">
+                        <div class="text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="material-symbols-rounded opacity-5">map</i>
+                        </div>
+                        <span class="nav-link-text ms-1">Daftar Wilayah</span>
                     </a>
                 </li>
                 <li class="nav-item mt-3">
@@ -165,7 +166,7 @@
                 <a class="nav-link {{ request()->routeIs('profil.edit') ? 'active bg-gradient-dark text-white' : 'text-dark' }}"
                     href="{{ route('profil.edit') }}">
                     <div class="text-center me-2 d-flex align-items-center justify-content-center">
-                        <i class="material-symbols-rounded opacity-5">person</i> {{-- Ikon untuk profil --}}
+                        <i class="material-symbols-rounded opacity-5">person</i>
                     </div>
                     <span class="nav-link-text ms-1">Edit Profil</span>
                 </a>
@@ -173,13 +174,11 @@
 
         </ul>
     </div>
-    <div class="sidenav-footer position-absolute w-100 bottom-0 mb-3 px-3"> {{-- Gunakan w-100, bottom-0, mb-3, px-3 --}}
-        {{-- Hapus <li> karena tidak perlu --}}
-        {{-- Tambahkan class flexbox pada <a> --}}
+    <div class="sidenav-footer position-absolute w-100 bottom-0 mb-3 px-3">
         <a class="btn bg-gradient-dark w-100 d-flex align-items-center justify-content-center" href="#"
             onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-            <i class="material-symbols-rounded opacity-10 me-2">logout</i> {{-- opacity-10 opsional, me-2 beri jarak --}}
-            <span class="text-sm">Keluar</span> {{-- Bungkus teks agar lebih mudah di-style jika perlu --}}
+            <i class="material-symbols-rounded opacity-10 me-2">logout</i>
+            <span class="text-sm">Keluar</span>
         </a>
     </div>
     <form action="{{ route('logout') }}" method="post" id="logout-form" style="display: none;">

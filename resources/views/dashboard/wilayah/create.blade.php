@@ -1,16 +1,7 @@
 @extends('layouts.master')
-
-@section('page')
-    Data Wilayah
-@endsection
-
-@section('sub-page')
-    Tambah Wilayah
-@endsection
-
-@section('title')
-    Tambah Wilayah
-@endsection
+@section('page', 'Daftar Wilayah')
+@section('sub-page', 'Tambah Wilayah')
+@section('title', 'Tambah Wilayah')
 
 @section('content')
     <div class="row">
@@ -19,7 +10,7 @@
                 <div class="card-header">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Form Tambah Wilayah</h5>
-                        <a href="{{ route('wilayah.index') }}" class="btn btn-secondary bg-gradient-secondary btn-sm">
+                        <a href="{{ route('wilayah.index') }}" class="btn btn-sm btn-secondary bg-gradient-secondary">
                             <i class="fa fa-arrow-left"></i> Kembali
                         </a>
                     </div>
@@ -28,7 +19,6 @@
                     <form action="{{ route('wilayah.store') }}" method="POST">
                         @csrf
                         <div class="row">
-                            {{-- Nama Wilayah --}}
                             <div class="col-12">
                                 <div class="mb-3">
                                     <label for="nama_wilayah" class="form-label">Nama Wilayah</label>
@@ -37,8 +27,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        {{-- [BARU] Input Latitude dan Longitude --}}
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
@@ -58,9 +46,7 @@
                                 </div>
                             </div>
                         </div>
-                        {{-- [AKHIR BARU] --}}
-
-                        <button type="submit" class="btn btn-dark"><i class="fa fa-save"></i> Simpan</button>
+                        <button type="submit" class="btn btn-sm btn-dark bg-gradient-dark"><i class="fa fa-save"></i> Simpan</button>
                     </form>
                 </div>
             </div>

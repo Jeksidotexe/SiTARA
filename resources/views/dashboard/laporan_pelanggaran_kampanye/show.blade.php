@@ -1,12 +1,9 @@
 @extends('layouts.master')
-
 @section('page', 'Detail Laporan Harian Pelanggaran Kampanye')
 @section('title', 'Detail Laporan Harian Pelanggaran Kampanye')
 
 @push('styles')
-    {{-- ... (CSS Anda sudah benar, tidak perlu diubah) ... --}}
     <style>
-        /* Section dengan Material Card Style */
         .section-card {
             background: #ffffff;
             border-radius: 0.75rem;
@@ -33,7 +30,6 @@
             padding: 1.5rem;
         }
 
-        /* Content Section Headers */
         .content-header {
             display: flex;
             align-items: center;
@@ -73,7 +69,6 @@
             margin: 0;
         }
 
-        /* Subsection Numbering */
         .subsection-number {
             display: inline-flex;
             align-items: center;
@@ -89,7 +84,6 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.12);
         }
 
-        /* Report Content */
         .report-content-wrapper {
             background: linear-gradient(195deg, #FAFBFC 0%, #F8F9FA 100%);
             border-radius: 0.75rem;
@@ -117,7 +111,6 @@
             margin-bottom: 1rem;
         }
 
-        /* File List Material Style */
         .file-list-wrapper {
             background: #f8f9fa;
             border-radius: 0.75rem;
@@ -185,7 +178,6 @@
             margin-top: 0.25rem;
         }
 
-        /* Empty State Material Style */
         .empty-state-material {
             text-align: center;
             padding: 3rem 1rem;
@@ -203,15 +195,12 @@
             margin: 0;
         }
 
-        /* Section Divider */
         .section-divider-material {
             height: 1px;
             background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.1), transparent);
             margin: 2rem 0;
         }
 
-
-        /* --- CSS BARU/MODIFIKASI UNTUK INFO CARD SIDE-BY-SIDE --- */
         .info-card-custom {
             background: linear-gradient(195deg, #FFFFFF 0%, #F8F9FA 100%);
             border-radius: 0.75rem;
@@ -253,7 +242,6 @@
             line-height: 1.2;
             display: block;
             margin-bottom: 0;
-            /* Hapus margin bottom */
         }
 
         .info-card-value {
@@ -272,9 +260,6 @@
             font-size: 0.8rem;
         }
 
-        /* --- AKHIR CSS BARU/MODIFIKASI --- */
-
-        /* Responsive Adjustments */
         @media (max-width: 768px) {
             .file-item-material {
                 flex-direction: column;
@@ -294,7 +279,6 @@
         <div class="row">
             <div class="col-12">
                 <div id="laporan-content-wrapper">
-                    {{-- Page Header (Tombol Kembali Dinamis) --}}
                     <div class="card mb-5">
                         <div class="card-body p-3">
                             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
@@ -304,7 +288,7 @@
                                 @php
                                     $from = request('from');
                                     $userRole = Auth::user()->role;
-                                    $backUrl = route('dashboard'); // Default fallback
+                                    $backUrl = route('dashboard');
 
                                     if ($from == 'pending') {
                                         $backUrl = route('verifikasi.pending');
@@ -319,21 +303,19 @@
                                             $userRole == 'pimpinan' ? route('verifikasi.pending') : route('dashboard');
                                     }
                                 @endphp
-                                <a href="{{ $backUrl }}" class="btn btn-secondary bg-gradient-secondary btn-sm mb-0">
+                                <a href="{{ $backUrl }}" class="btn btn-sm btn-secondary bg-gradient-secondary mb-0">
                                     <i class="fas fa-arrow-left me-1"></i> Kembali
                                 </a>
                             </div>
                         </div>
                     </div>
 
-                    {{-- Info Cards Grid (HANYA INFORMASI) --}}
                     <div class="row">
                         <div class="col-12">
                             <h6 class="text-uppercase text-body text-xs font-weight-bolder mb-3">
                                 <i class="fas fa-info-circle me-2"></i>Informasi Laporan
                             </h6>
                         </div>
-                        {{-- Operator Info --}}
                         <div class="col-lg-4 col-md-6 col-sm-6 mb-4">
                             <div class="info-card-custom">
                                 <div class="info-card-icon-wrapper bg-gradient-dark">
@@ -346,7 +328,6 @@
                             </div>
                         </div>
 
-                        {{-- Tanggal Laporan --}}
                         <div class="col-lg-4 col-md-6 col-sm-6 mb-4">
                             <div class="info-card-custom">
                                 <div class="info-card-icon-wrapper bg-gradient-dark">
@@ -361,7 +342,6 @@
                             </div>
                         </div>
 
-                        {{-- Status --}}
                         <div class="col-lg-4 col-md-6 col-sm-6 mb-4">
                             <div class="info-card-custom">
                                 <div
@@ -395,12 +375,8 @@
                                 </div>
                             </div>
                         </div>
-
                     </div>
-                    {{-- Akhir Info Cards Grid --}}
 
-
-                    {{-- == AWAL BLOK TINDAKAN (ACTION ROW) == --}}
                     @if (
                         (Auth::user()->role == 'pimpinan' && $laporan->isPending()) ||
                             (Auth::user()->role == 'operator' && $laporan->needsRevision()))
@@ -412,9 +388,7 @@
                                 </h6>
                             </div>
 
-                            {{-- A. Tombol untuk PIMPINAN --}}
                             @if (Auth::user()->role == 'pimpinan' && $laporan->isPending())
-                                {{-- Setujui Laporan --}}
                                 <div class="col-xl-6 col-md-6 mb-3">
                                     <div class="info-card-custom">
                                         <div class="info-card-icon-wrapper bg-gradient-success">
@@ -429,7 +403,7 @@
                                                 @php
                                                     $wilayah = $laporan->operator->wilayah ?? null;
                                                 @endphp
-                                                <button type="button" class="btn bg-gradient-success w-100 mb-0"
+                                                <button type="button" class="btn btn-sm btn-success bg-gradient-success w-100 mb-0"
                                                     id="btn-approve-sweetalert"
                                                     data-wilayah-nama="{{ $wilayah->nama_wilayah ?? 'Wilayah Tidak Ditemukan' }}">
                                                     <i class="fas fa-check-circle me-2"></i> Setujui
@@ -438,7 +412,6 @@
                                         </div>
                                     </div>
                                 </div>
-                                {{-- Minta Revisi --}}
                                 <div class="col-xl-6 col-md-6 mb-3">
                                     <div class="info-card-custom">
                                         <div class="info-card-icon-wrapper bg-gradient-warning">
@@ -450,7 +423,7 @@
                                                 Mengembalikan laporan untuk diperbaiki oleh operator
                                             </p>
                                             <div class="info-card-value">
-                                                <button type="button" class="btn bg-gradient-warning w-100 mb-0"
+                                                <button type="button" class="btn btn-sm btn-warning bg-gradient-warning w-100 mb-0"
                                                     data-bs-toggle="modal" data-bs-target="#revisionModal">
                                                     <i class="fas fa-edit me-2"></i> Minta Revisi
                                                 </button>
@@ -460,44 +433,32 @@
                                 </div>
                             @endif
 
-                            {{-- B. Kartu untuk OPERATOR (SAAT REVISI) --}}
-                            {{-- [PERBAIKAN] Tata letak ini disesuaikan dengan permintaan Anda --}}
                             @if (Auth::user()->role == 'operator' && $laporan->needsRevision())
-                                {{-- Kartu Catatan Revisi --}}
                                 <div class="col-xl-12 col-md-12 mb-3">
                                     <div class="card h-100">
                                         <div class="card-body p-3"
                                             style="background: linear-gradient(195deg, #FFF3E0 0%, #FFE0B2 100%); border-left: 4px solid #fb8c00; border-radius:0.75rem;">
-
-                                            {{-- Header Kartu: Judul di Kiri, Tombol di Kanan --}}
                                             <div class="d-flex justify-content-between align-items-center mb-2">
                                                 <h6 class="font-weight-bolder mb-0 text-warning">
                                                     <i class="fas fa-sticky-note me-2"></i>
                                                     Catatan Revisi
                                                 </h6>
                                                 <a href="{{ route('laporan_pelanggaran_kampanye.edit', ['laporan_pelanggaran_kampanye' => $laporan->id_laporan]) }}"
-                                                    class="btn btn-dark btn-sm mb-0">
+                                                    class="btn btn-sm btn-dark btn-gradient-dark mb-0">
                                                     <i class="fas fa-edit me-1"></i> Perbaiki Laporan Ini
                                                 </a>
                                             </div>
-
-                                            <hr class="dark horizontal my-2"> {{-- Pemisah --}}
-
+                                            <hr class="dark horizontal my-2">
                                             <p class="mb-0 text-sm text-dark">
                                                 {!! nl2br(e($laporan->catatan)) !!}</p>
                                         </div>
                                     </div>
                                 </div>
                             @endif
-
                         </div>
                     @endif
-                    {{-- == AKHIR BLOK TINDAKAN == --}}
 
-
-                    {{-- Modals & Forms (HANYA UNTUK PIMPINAN) --}}
                     @if (Auth::user()->role == 'pimpinan' && $laporan->isPending())
-                        {{-- Form Persetujuan (Tersembunyi) --}}
                         <form id="approve-form"
                             action="{{ route('verifikasi.approve', ['reportType' => 'laporan-pelanggaran-kampanye', 'id' => $laporan->id_laporan]) }}"
                             method="POST" style="display: none;">
@@ -506,7 +467,6 @@
                             <input type="hidden" name="status_wilayah_baru" id="input-status-wilayah-baru" value="">
                         </form>
 
-                        {{-- Modal Revisi --}}
                         <div class="modal fade" id="revisionModal" tabindex="-1" aria-labelledby="revisionModalLabel"
                             aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered">
@@ -534,11 +494,11 @@
                                             </div>
                                         </div>
                                         <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary bg-gradient-secondary"
+                                            <button type="button" class="btn btn-sm btn-secondary bg-gradient-secondary"
                                                 data-bs-dismiss="modal">
                                                 <i class="fas fa-times me-1"></i> Batal
                                             </button>
-                                            <button type="submit" class="btn bg-gradient-dark">
+                                            <button type="submit" class="btn btn-sm btn-dark bg-gradient-dark">
                                                 <i class="fas fa-paper-plane me-1"></i> Kirim Revisi
                                             </button>
                                         </div>
@@ -547,11 +507,7 @@
                             </div>
                         </div>
                     @endif
-                    {{-- Akhir Modals & Forms Pimpinan --}}
 
-
-                    {{-- == BLOK CATATAN VERIFIKASI == --}}
-                    {{-- [PERBAIKAN] Pimpinan sekarang dapat melihat catatan revisi mereka sendiri --}}
                     @if ($laporan->pimpinan && !(Auth::user()->role == 'operator' && $laporan->needsRevision()))
                         <div class="row mt-5">
                             <div class="col-12 mb-3">
@@ -587,12 +543,10 @@
                                 </div>
                             @endif
 
-                            {{-- [PERBAIKAN] Logika ini sekarang akan menampilkan catatan revisi UNTUK PIMPINAN juga --}}
                             @if ($laporan->catatan)
                                 <div class="col-12 mb-4">
                                     <div class="card">
                                         @if ($laporan->needsRevision())
-                                            {{-- Tampilkan hanya jika BUKAN operator (karena operator sudah punya kartu di atas) --}}
                                             @if (Auth::user()->role != 'operator')
                                                 <div class="card-body p-3"
                                                     style="background: linear-gradient(195deg, #FFF3E0 0%, #FFE0B2 100%); border-left: 4px solid #fb8c00;">
@@ -619,11 +573,7 @@
                             @endif
                         </div>
                     @endif
-                    {{-- == AKHIR BLOK CATATAN VERIFIKASI == --}}
 
-
-                    {{-- == KONTEN LAPORAN == --}}
-                    {{-- Content: Deskripsi --}}
                     <div class="row mt-4">
                         <div class="col-12">
                             <div class="card">
@@ -641,7 +591,6 @@
                         </div>
                     </div>
 
-                    {{-- Content: Permasalahan Strategis --}}
                     <div class="row mt-4">
                         <div class="col-12">
                             <div class="card">
@@ -692,11 +641,7 @@
                                                                 'jpg',
                                                                 'jpeg',
                                                                 'png',
-                                                                'gif',
-                                                                'bmp',
-                                                                'webp',
                                                             ]);
-                                                            // PERUBAHAN: Menghapus 'isPdf'
                                                         @endphp
 
                                                         <div class="file-item-material">
@@ -704,7 +649,6 @@
                                                                 @if ($isImage)
                                                                     <img src="{{ $fullPath }}" alt="Preview">
                                                                 @else
-                                                                    {{-- Ikon fallback untuk file lama (mungkin PDF) --}}
                                                                     <i class="fas fa-file-alt"></i>
                                                                 @endif
                                                             </div>
@@ -712,8 +656,7 @@
                                                                 <div class="file-name-material">{{ $fileName }}</div>
                                                             </div>
                                                             <button type="button"
-                                                                class="btn btn-dark bg-gradient-dark btn-sm mb-0"
-                                                                {{-- PERUBAHAN: Menghapus parameter 'isPdf' --}}
+                                                                class="btn btn-sm btn-dark bg-gradient-dark mb-0"
                                                                 onclick="showPreview('{{ $fullPath }}', {{ $isImage ? 'true' : 'false' }})">
                                                                 <i class="fas fa-eye me-1"></i> Lihat
                                                             </button>
@@ -740,7 +683,6 @@
                         </div>
                     </div>
 
-                    {{-- Content: Penutup --}}
                     <div class="row mt-4">
                         <div class="col-12">
                             <div class="card">
@@ -757,14 +699,11 @@
                             </div>
                         </div>
                     </div>
-                    {{-- == AKHIR KONTEN LAPORAN == --}}
-
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- == MODAL PREVIEW == --}}
     <div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
@@ -780,7 +719,7 @@
                     <div id="previewFallback" style="display: none;">
                         <i class="fas fa-file-alt" style="font-size: 80px; color: #67748e;"></i>
                         <p class="mt-3 text-secondary">Pratinjau tidak tersedia untuk tipe file ini.</p>
-                        <a href="" id="previewDownloadLink" class="btn btn-dark" target="_blank">
+                        <a href="" id="previewDownloadLink" class="btn btn-sm btn-dark bg-gradient-dark" target="_blank">
                             <i class="fas fa-download me-2"></i> Download File
                         </a>
                     </div>
@@ -791,7 +730,6 @@
 @endsection
 
 @push('scripts')
-    {{-- == SEMUA SCRIPT == --}}
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
@@ -807,7 +745,6 @@
             }
         });
 
-        // PERUBAHAN: Menghapus parameter 'isPdf'
         function showPreview(filePath, isImage) {
             if (!previewModal) return;
 
@@ -828,7 +765,6 @@
                 imgEl.style.display = 'block';
                 modalLabel.innerText = 'Pratinjau Gambar';
             } else {
-                // Ini untuk file lama yg mungkin bukan gambar (cth: PDF lama)
                 downloadLink.href = filePath;
                 fallbackEl.style.display = 'block';
                 modalLabel.innerText = 'Download File';
@@ -841,16 +777,13 @@
     <script>
         function initializeLaporanScripts() {
             console.log('[Init] Memasang ulang event listener untuk tombol...');
-            // --- Variabel untuk Form ---
             const approveForm = document.getElementById('approve-form');
             const revisionForm = document.getElementById('revision-form');
 
-            // --- Variabel untuk Tombol & Modal ---
-            const btnApprove = document.getElementById('btn-approve-sweetalert'); // Tombol Setujui
-            const revisionModalElement = document.getElementById('revisionModal'); // Modal Revisi
-            const catatanRevisiTextarea = document.getElementById('catatan'); // Textarea Revisi
+            const btnApprove = document.getElementById('btn-approve-sweetalert');
+            const revisionModalElement = document.getElementById('revisionModal');
+            const catatanRevisiTextarea = document.getElementById('catatan');
 
-            // Listener untuk Tombol Setujui
             if (btnApprove && approveForm) {
                 btnApprove.addEventListener('click', function(event) {
                     const wilayahNama = event.currentTarget.dataset.wilayahNama || 'Wilayah';
@@ -878,8 +811,8 @@
                         cancelButtonColor: '#67748e',
                         reverseButtons: true,
                         customClass: {
-                            confirmButton: 'btn btn-dark bg-gradient-dark ms-2',
-                            cancelButton: 'btn btn-secondary bg-gradient-secondary me-2'
+                            confirmButton: 'btn btn-sm btn-dark bg-gradient-dark ms-2',
+                            cancelButton: 'btn btn-sm btn-secondary bg-gradient-secondary me-2'
                         },
                         buttonsStyling: false,
                         preConfirm: () => {
@@ -912,7 +845,6 @@
                 });
             }
 
-            // Logika untuk Form Revisi
             if (revisionForm && catatanRevisiTextarea) {
                 revisionForm.addEventListener('submit', function(event) {
                     event.preventDefault();
@@ -952,8 +884,8 @@
                         cancelButtonColor: '#67748e',
                         reverseButtons: true,
                         customClass: {
-                            confirmButton: 'btn btn-dark bg-gradient-dark ms-2',
-                            cancelButton: 'btn btn-secondary bg-gradient-secondary me-2'
+                            confirmButton: 'btn btn-sm btn-dark bg-gradient-dark ms-2',
+                            cancelButton: 'btn btn-sm btn-secondary bg-gradient-secondary me-2'
                         },
                         buttonsStyling: false
                     }).then((result) => {
@@ -992,27 +924,16 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             if (typeof window.Echo !== 'undefined') {
-
-                // 1. Ambil ID laporan dari halaman ini (disediakan oleh Blade)
                 const thisLaporanId = {{ $laporan->id_laporan }};
                 const contentWrapperId = 'laporan-content-wrapper';
-
                 console.log(`[Reverb] Mendengarkan di channel 'laporan-updates' untuk ID: ${thisLaporanId}`);
-
                 window.Echo.channel('laporan-updates')
                     .listen('.LaporanUpdated', (e) => {
-
                         console.log('[Reverb] Menerima event:', e);
-
-                        // 2. PERIKSA: Apakah event ini untuk laporan yang sedang saya lihat?
                         if (e.laporanId === thisLaporanId) {
-
                             console.log(
                                 `[Reverb] Event ini untuk laporan ${thisLaporanId}. Melakukan update...`);
-
-                            // 2a. Bonus: Jika laporan dihapus, redirect ke index
                             if (e.newStatus === 'deleted') {
-                                // Tampilkan notifikasi dan redirect
                                 Swal.fire({
                                     title: 'Laporan Dihapus',
                                     text: 'Laporan yang sedang Anda lihat telah dihapus.',
@@ -1022,34 +943,25 @@
                                     timerProgressBar: true
                                 }).then(() => {
                                     window.location.href =
-                                        // PERUBAHAN: Pastikan route kembali ini benar
                                         "{{ route('laporan_pelanggaran_kampanye.index') }}";
                                 });
                                 return;
                             }
 
-                            // 2b. Ambil konten halaman baru secara diam-diam
-                            fetch(window.location.href) // 'window.location.href' adalah URL saat ini
+                            fetch(window.location.href)
                                 .then(response => response.text())
                                 .then(html => {
-                                    // 3. Gunakan DOMParser untuk mengubah teks HTML menjadi dokumen
                                     const parser = new DOMParser();
                                     const newDoc = parser.parseFromString(html, 'text/html');
 
-                                    // 4. Temukan wrapper konten di dokumen LAMA dan BARU
                                     const newContent = newDoc.getElementById(contentWrapperId);
                                     const oldContent = document.getElementById(contentWrapperId);
 
                                     if (newContent && oldContent) {
-                                        // 5. TUKAR KONTEN!
                                         oldContent.innerHTML = newContent.innerHTML;
                                         console.log('[Reverb] Konten berhasil diperbarui tanpa reload.');
 
-                                        // 6. PASANG ULANG "LEM" (EVENT LISTENER) PADA KONTEN BARU
                                         initializeLaporanScripts();
-
-                                        // (Opsional) Inisialisasi ulang script modal jika perlu
-                                        // ...
 
                                     } else {
                                         console.warn(
@@ -1060,7 +972,6 @@
                                 })
                                 .catch(error => {
                                     console.error('[Reverb] Gagal fetch update konten:', error);
-                                    // Fallback jika fetch gagal
                                     location.reload();
                                 });
 

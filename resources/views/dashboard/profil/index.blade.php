@@ -1,12 +1,6 @@
 @extends('layouts.master')
-
-@section('page')
-    Edit Profil
-@endsection
-
-@section('title')
-    Edit Profil
-@endsection
+@section('page', 'Edit Profil')
+@section('title', 'Edit Profil')
 
 @section('content')
     <div class="row">
@@ -15,14 +9,12 @@
                 <div class="card-header">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Edit Profil Pengguna</h5>
-                        {{-- Arahkan kembali ke dashboard atau halaman sebelumnya --}}
-                        <a href="{{ route('dashboard') }}" class="btn btn-dark btn-sm">
+                        <a href="{{ route('dashboard') }}" class="btn btn-sm btn-secondary bg-gradient-secondary">
                             <i class="fa fa-arrow-left"></i> Kembali
                         </a>
                     </div>
                 </div>
                 <div class="card-body">
-                    {{-- Form mengarah ke route 'profil.update' --}}
                     <form action="{{ route('profil.update') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
@@ -31,7 +23,6 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="nama" class="form-label">Nama Lengkap</label>
-                                    {{-- Gunakan variabel $user --}}
                                     <input type="text" class="form-control" id="nama" name="nama"
                                         value="{{ old('nama', $user->nama) }}" required>
                                 </div>
@@ -100,7 +91,6 @@
                             </div>
                         </div>
 
-                        {{-- Bagian Upload Foto (Sama seperti di edit.blade.php) --}}
                         <div class="custom-file-upload-header-container border border-bottom-0 " id="foto_container_edit">
                             <div class="custom-file-upload-header">
                                 <div class="text-content">
@@ -109,7 +99,7 @@
                                         Silahkan upload foto baru untuk mengubah foto profil.
                                     </p>
                                 </div>
-                                <button type="button" class="btn btn-sm bg-gradient-dark text-white" id="uploadBtn_edit"
+                                <button type="button" class="btn btn-sm btn-dark bg-gradient-dark" id="uploadBtn_edit"
                                     onclick="document.getElementById('foto').click()">
                                     <i class="fa fa-upload"></i> Upload
                                 </button>
@@ -126,7 +116,6 @@
                             @php
                                 $isImage = false;
                                 $initialSrc = '#';
-                                // Gunakan $user->foto
                                 if ($user->foto) {
                                     $fullPath = storage_path('app/public/' . $user->foto);
                                     if (file_exists($fullPath)) {
@@ -151,7 +140,7 @@
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-dark mt-4">
+                        <button type="submit" class="btn btn-sm btn-dark bg-gradient-dark mt-4">
                             <i class="fa fa-save"></i> Simpan Perubahan
                         </button>
                     </form>

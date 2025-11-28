@@ -1,12 +1,6 @@
 @extends('layouts.master')
-
-@section('page')
-    Akun Pengguna
-@endsection
-
-@section('title')
-    Akun Pengguna
-@endsection
+@section('page', 'Akun Pengguna')
+@section('title', 'Akun Pengguna')
 
 @section('content')
     <div class="row">
@@ -21,22 +15,22 @@
         <div class="col-12 mb-md-0 mb-4">
             <div class="card">
                 <div class="card-header pb-0">
-                    <a href="{{ route('pengguna.create') }}" class="btn btn-dark glow-dark btn-sm">
+                    <a href="{{ route('pengguna.create') }}" class="btn btn-sm btn-dark bg-gradient-dark">
                         <i class="fa fa-plus"></i> Tambah Pengguna
                     </a>
                 </div>
 
                 <div class="card-body p-3">
                     <div class="table-responsive p-0">
-                        <table class="table table-striped">
+                        <table class="table table-striped" style="width: 100%">
                             <thead>
-                                <th width="5%">No</th>
+                                <th width="5">No</th>
                                 <th>Foto</th>
                                 <th>Nama</th>
                                 <th>Email</th>
                                 <th>Wilayah</th>
                                 <th>Role</th>
-                                <th width="15%"><i class="fa fa-cog"></i></th>
+                                <th width="15"><i class="fa fa-cog"></i></th>
                             </thead>
                         </table>
                     </div>
@@ -54,7 +48,8 @@
 
         $(function() {
             table = $('.table').DataTable({
-                responsive: true,
+                responsive: false,
+                scrollX: true,
                 processing: true,
                 serverSide: true,
                 ajax: '{{ route('pengguna.data') }}',
@@ -109,8 +104,8 @@
                 cancelButtonText: '<i class="fas fa-times"></i> Batal',
 
                 customClass: {
-                    confirmButton: 'btn btn-dark bg-gradient-dark me-2',
-                    cancelButton: 'btn btn-secondary bg-gradient-secondary ms-2'
+                    confirmButton: 'btn btn-sm btn-dark bg-gradient-dark me-2',
+                    cancelButton: 'btn btn-sm btn-secondary bg-gradient-secondary ms-2'
                 },
                 buttonsStyling: false
 
@@ -146,7 +141,7 @@
                                 text: errorMessage,
                                 icon: 'error',
                                 customClass: {
-                                    confirmButton: 'btn btn-dark bg-gradient-dark'
+                                    confirmButton: 'btn btn-sm btn-dark bg-gradient-dark'
                                 },
                                 buttonsStyling: false,
                                 confirmButtonText: 'OK'

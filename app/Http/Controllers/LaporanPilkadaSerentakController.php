@@ -153,8 +153,16 @@ class LaporanPilkadaSerentakController extends Controller
             ->addColumn('operator', function ($laporan) {
                 return $laporan->operator->nama ?? '<span class="text-danger">Operator Dihapus</span>';
             })
+            ->filterColumn('operator', function ($query, $keyword) {
+                $query->whereHas('operator', function ($q) use ($keyword) {
+                    $q->where('nama', 'like', "%{$keyword}%");
+                });
+            })
             ->editColumn('tanggal_laporan', function ($laporan) {
                 return Carbon::parse($laporan->tanggal_laporan)->isoFormat('D MMMM YYYY');
+            })
+            ->filterColumn('tanggal_laporan', function ($query, $keyword) {
+                $query->whereRaw("DATE_FORMAT(tanggal_laporan,'%d %M %Y') like ?", ["%{$keyword}%"]);
             })
             ->editColumn('status_laporan', function ($laporan) {
                 if ($laporan->status_laporan == 'disetujui') {

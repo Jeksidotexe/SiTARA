@@ -182,12 +182,11 @@ class DaftarLaporanBulananController extends Controller
         }
 
         $year = $request->input('year', now()->year);
-
         $filterReportType = $request->input('report_type');
 
         $allQueries = collect();
-
         $modelsToQuery = [];
+
         if (!empty($filterReportType) && isset($this->reportModels[$filterReportType])) {
             $modelsToQuery[$filterReportType] = $this->reportModels[$filterReportType];
         } else {
@@ -243,30 +242,65 @@ class DaftarLaporanBulananController extends Controller
             ->editColumn('tanggal_laporan', function ($row) {
                 return Carbon::parse($row->tanggal_laporan)->isoFormat('D MMMM YYYY');
             })
+            // --- MULAI BAGIAN FORMAT KOLOM NARASI ---
             ->addColumn('pemerintahan_daerah', function ($row) {
-                return Str::limit(strip_tags($row->narasi_a), 100);
+                $text = strip_tags($row->narasi_a);
+                // Cek jika kosong, null, atau hanya strip
+                if (empty(trim($text)) || trim($text) === '-') {
+                    return '<span class="text-muted fst-italic small" style="opacity: 0.7;">-- Nihil --</span>';
+                }
+                return '<span title="' . e($text) . '" style="cursor:help;">' . Str::limit($text, 50) . '</span>';
             })
             ->addColumn('program_pembangunan', function ($row) {
-                return Str::limit(strip_tags($row->narasi_b), 100);
+                $text = strip_tags($row->narasi_b);
+                if (empty(trim($text)) || trim($text) === '-') {
+                    return '<span class="text-muted fst-italic small" style="opacity: 0.7;">-- Nihil --</span>';
+                }
+                return '<span title="' . e($text) . '" style="cursor:help;">' . Str::limit($text, 50) . '</span>';
             })
             ->addColumn('pelayanan_publik', function ($row) {
-                return Str::limit(strip_tags($row->narasi_c), 100);
+                $text = strip_tags($row->narasi_c);
+                if (empty(trim($text)) || trim($text) === '-') {
+                    return '<span class="text-muted fst-italic small" style="opacity: 0.7;">-- Nihil --</span>';
+                }
+                return '<span title="' . e($text) . '" style="cursor:help;">' . Str::limit($text, 50) . '</span>';
             })
             ->addColumn('ideologi', function ($row) {
-                return Str::limit(strip_tags($row->narasi_d), 100);
+                $text = strip_tags($row->narasi_d);
+                if (empty(trim($text)) || trim($text) === '-') {
+                    return '<span class="text-muted fst-italic small" style="opacity: 0.7;">-- Nihil --</span>';
+                }
+                return '<span title="' . e($text) . '" style="cursor:help;">' . Str::limit($text, 50) . '</span>';
             })
             ->addColumn('politik', function ($row) {
-                return Str::limit(strip_tags($row->narasi_e), 100);
+                $text = strip_tags($row->narasi_e);
+                if (empty(trim($text)) || trim($text) === '-') {
+                    return '<span class="text-muted fst-italic small" style="opacity: 0.7;">-- Nihil --</span>';
+                }
+                return '<span title="' . e($text) . '" style="cursor:help;">' . Str::limit($text, 50) . '</span>';
             })
             ->addColumn('ekonomi', function ($row) {
-                return Str::limit(strip_tags($row->narasi_f), 100);
+                $text = strip_tags($row->narasi_f);
+                if (empty(trim($text)) || trim($text) === '-') {
+                    return '<span class="text-muted fst-italic small" style="opacity: 0.7;">-- Nihil --</span>';
+                }
+                return '<span title="' . e($text) . '" style="cursor:help;">' . Str::limit($text, 50) . '</span>';
             })
             ->addColumn('sosial_budaya', function ($row) {
-                return Str::limit(strip_tags($row->narasi_g), 100);
+                $text = strip_tags($row->narasi_g);
+                if (empty(trim($text)) || trim($text) === '-') {
+                    return '<span class="text-muted fst-italic small" style="opacity: 0.7;">-- Nihil --</span>';
+                }
+                return '<span title="' . e($text) . '" style="cursor:help;">' . Str::limit($text, 50) . '</span>';
             })
             ->addColumn('hankam', function ($row) {
-                return Str::limit(strip_tags($row->narasi_h), 100);
+                $text = strip_tags($row->narasi_h);
+                if (empty(trim($text)) || trim($text) === '-') {
+                    return '<span class="text-muted fst-italic small" style="opacity: 0.7;">-- Nihil --</span>';
+                }
+                return '<span title="' . e($text) . '" style="cursor:help;">' . Str::limit($text, 50) . '</span>';
             })
+            // --- AKHIR BAGIAN FORMAT KOLOM NARASI ---
             ->addColumn('aksi', function ($row) {
                 $paramName = str_replace('-', '_', $row->route_base);
                 $showUrl = route($row->route_base . '.show', [
@@ -274,9 +308,9 @@ class DaftarLaporanBulananController extends Controller
                     'from' => 'laporan-bulanan'
                 ]);
                 return '
-                   <a href="' . $showUrl . '" class="btn btn-sm btn-dark-blue bg-gradient-dark-blue">
-                       <i class="fa fa-eye"></i> Detail
-                   </a>';
+                    <a href="' . $showUrl . '" class="btn btn-sm btn-dark-blue bg-gradient-dark-blue">
+                        <i class="fa fa-eye"></i> Detail
+                    </a>';
             })
             ->only([
                 'tanggal_laporan',
@@ -290,7 +324,17 @@ class DaftarLaporanBulananController extends Controller
                 'hankam',
                 'aksi'
             ])
-            ->rawColumns(['aksi'])
+            ->rawColumns([
+                'pemerintahan_daerah',
+                'program_pembangunan',
+                'pelayanan_publik',
+                'ideologi',
+                'politik',
+                'ekonomi',
+                'sosial_budaya',
+                'hankam',
+                'aksi'
+            ])
             ->make(true);
     }
 }

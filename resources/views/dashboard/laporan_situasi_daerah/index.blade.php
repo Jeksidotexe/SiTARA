@@ -1,7 +1,5 @@
 @extends('layouts.master')
-
 @section('page', 'Laporan Situasi Daerah')
-
 @section('title', 'Laporan Situasi Daerah')
 
 @section('content')
@@ -17,20 +15,20 @@
         <div class="col-12 mb-md-0 mb-4">
             <div class="card">
                 <div class="card-header pb-0">
-                    <a href="{{ route('laporan_situasi_daerah.create') }}" class="btn btn-dark glow-dark btn-sm">
+                    <a href="{{ route('laporan_situasi_daerah.create') }}" class="btn btn-sm btn-dark bg-gradient-dark">
                         <i class="fa fa-plus"></i> Buat Laporan Baru
                     </a>
                 </div>
 
                 <div class="card-body p-3">
                     <div class="table-responsive p-0">
-                        <table class="table table-striped" id="table-laporan">
+                        <table class="table table-striped" id="table-laporan" style="width: 100%">
                             <thead>
-                                <th width="5%">No</th>
+                                <th width="5">No</th>
                                 <th>Nama Operator</th>
                                 <th>Tanggal Laporan</th>
                                 <th>Status Laporan</th>
-                                <th width="15%"><i class="fa fa-cog"></i></th>
+                                <th width="15"><i class="fa fa-cog"></i></th>
                             </thead>
                         </table>
                     </div>
@@ -41,19 +39,18 @@
 @endsection
 
 @push('scripts')
-    {{-- SweetAlert untuk konfirmasi hapus --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         let table;
 
         $(function() {
-            // Inisialisasi DataTables
             table = $('#table-laporan').DataTable({
-                responsive: true,
+                responsive: false,
+                scrollX: true,
                 processing: true,
                 serverSide: true,
-                ajax: '{{ route('laporan_situasi_daerah.data') }}', // Mengambil data dari route 'laporan_situasi_daerah.data'
+                ajax: '{{ route('laporan_situasi_daerah.data') }}',
                 columns: [{
                         data: 'DT_RowIndex',
                         searchable: false,
@@ -61,7 +58,7 @@
                     },
                     {
                         data: 'operator',
-                        name: 'operator.nama' // Memungkinkan pencarian berdasarkan nama operator
+                        name: 'operator.nama'
                     },
                     {
                         data: 'tanggal_laporan',
@@ -88,7 +85,6 @@
             });
         });
 
-        // Fungsi deleteData
         function deleteData(url) {
             Swal.fire({
                 title: 'Yakin ingin menghapus laporan ini?',
@@ -98,8 +94,8 @@
                 confirmButtonText: '<i class="fas fa-check-circle"></i> Ya, hapus!',
                 cancelButtonText: '<i class="fas fa-times"></i> Batal',
                 customClass: {
-                    confirmButton: 'btn btn-dark bg-gradient-dark me-2',
-                    cancelButton: 'btn btn-secondary bg-gradient-secondary ms-2'
+                    confirmButton: 'btn btn-sm btn-dark bg-gradient-dark me-2',
+                    cancelButton: 'btn btn-sm btn-secondary bg-gradient-secondary ms-2'
                 },
                 buttonsStyling: false
             }).then((result) => {
@@ -129,7 +125,7 @@
                                 text: errorMessage,
                                 icon: 'error',
                                 customClass: {
-                                    confirmButton: 'btn btn-dark bg-gradient-dark'
+                                    confirmButton: 'btn btn-sm btn-dark bg-gradient-dark'
                                 },
                                 buttonsStyling: false,
                                 confirmButtonText: 'OK'
@@ -141,24 +137,16 @@
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Pastikan variabel 'table' (dari $(function)) bisa diakses
-            // dan Echo sudah ter-load dari master layout
             if (typeof window.Echo !== 'undefined') {
 
                 console.log('[Reverb] Mendengarkan di channel publik: laporan-updates');
-
-                // Dengarkan channel publik 'laporan-updates'
                 window.Echo.channel('laporan-updates')
                     .listen('.LaporanUpdated', (e) => {
 
                         console.log('[Reverb] Menerima event LaporanUpdated:', e);
-
-                        // 'table' didefinisikan di dalam scope $(function)
-                        // Kita akses instance DataTable-nya
                         const dataTable = $('#table-laporan').DataTable();
 
                         if (dataTable) {
-                            // Muat ulang data DataTables
                             dataTable.ajax.reload();
                         }
                     });

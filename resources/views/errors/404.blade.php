@@ -1,9 +1,5 @@
 @extends('errors::layout')
 
-{{--
-  Ganti 'error' dengan ikon yang lebih relevan untuk 404.
-  Pilihan lain: 'search', 'find_in_page', 'explore_off'
---}}
 @section('icon', 'search_off')
 
 @section('code', '404')

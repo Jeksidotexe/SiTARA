@@ -1,6 +1,5 @@
 @extends('errors::layout')
 
-{{-- Ikon untuk server error --}}
 @section('icon', 'settings_suggest')
 
 @section('code', '500')

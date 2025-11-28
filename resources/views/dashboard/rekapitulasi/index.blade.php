@@ -11,11 +11,7 @@
                     <p class="text-sm mb-0">Pilih kriteria untuk menggabungkan laporan yang disetujui ke dalam satu file PDF.</p>
                 </div>
                 <div class="card-body">
-
-                    {{-- Form menargetkan rute 'rekapitulasi.cetak' dan membuka di tab baru --}}
                     <form action="{{ route('rekapitulasi.cetak') }}" method="GET" target="_blank" id="form-rekapitulasi">
-
-                        {{-- 1. PILIH WILAYAH (Hanya untuk Admin) --}}
                         @if (Auth::user()->role == 'admin')
                             <div class="mb-3">
                                 <label for="id_wilayah" class="form-label">Wilayah</label>
@@ -28,7 +24,6 @@
                             </div>
                         @endif
 
-                        {{-- 2. PILIH TIPE LAPORAN --}}
                         <div class="mb-3">
                             <label for="tipe_laporan" class="form-label">Tipe Laporan</label>
                             <select class="form-select" id="tipe_laporan" name="tipe_laporan" required>
@@ -40,14 +35,12 @@
                         </div>
 
                         <p class="text-xs text-muted mt-4 mb-2">Pilih filter bulanan ATAU filter harian. <br/>Jika filter harian diisi, filter bulanan akan diabaikan.</p>
-
-                        {{-- 3. FILTER BULAN & TAHUN --}}
                         <div class="row" id="grup-bulanan">
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="bulan" class="form-label">Filter Bulanan</label>
                                     <select class="form-select" id="bulan" name="bulan">
-                                        <option value="">-- Pilih Bulan --</option> {{-- [UPDATED] Tambah opsi kosong --}}
+                                        <option value="">-- Pilih Bulan --</option>
                                         @for ($m = 1; $m <= 12; $m++)
                                             <option value="{{ $m }}" {{ $m == now()->month ? 'selected' : '' }}>
                                                 {{ Carbon\Carbon::create(null, $m, 1)->isoFormat('MMMM') }}
@@ -60,7 +53,7 @@
                                 <div class="mb-3">
                                     <label for="tahun" class="form-label">Tahun</label>
                                     <select class="form-select" id="tahun" name="tahun">
-                                        <option value="">-- Pilih Tahun --</option> {{-- [UPDATED] Tambah opsi kosong --}}
+                                        <option value="">-- Pilih Tahun --</option>
                                         @foreach ($availableYears as $year)
                                             <option value="{{ $year }}" {{ $year == now()->year ? 'selected' : '' }}>
                                                 {{ $year }}
@@ -71,10 +64,9 @@
                             </div>
                         </div>
 
-                        {{-- 4. FILTER TANGGAL SPESIFIK --}}
                         <div class="mb-3" id="grup-tanggal">
                             <label for="tanggal" class="form-label">Filter Harian (Tanggal Spesifik)</label>
-                            <input type="date" class="form-control" id="tanggal" name="tanggal" value=""> {{-- [UPDATED] Value dikosongkan --}}
+                            <input type="date" class="form-control" id="tanggal" name="tanggal" value="">
                         </div>
 
                         <div class="mt-2">
@@ -93,23 +85,16 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
-            // Inisialisasi Select2
             $('#id_wilayah, #tipe_laporan, #bulan, #tahun').select2({
                 theme: 'bootstrap-5',
                 dropdownParent: $('#form-rekapitulasi')
             });
-
-            // [BARU] Logika untuk membersihkan filter lain
-
-            // Jika filter harian diisi, bersihkan filter bulanan
             $('#tanggal').on('change', function() {
                 if ($(this).val()) {
                     $('#bulan').val(null).trigger('change');
                     $('#tahun').val(null).trigger('change');
                 }
             });
-
-            // Jika filter bulanan diisi, bersihkan filter harian
             $('#bulan, #tahun').on('change', function() {
                 if ($('#bulan').val() || $('#tahun').val()) {
                     $('#tanggal').val('');

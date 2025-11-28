@@ -1,12 +1,6 @@
 @extends('layouts.master')
-
-@section('page')
-    Tambah Akun Pengguna
-@endsection
-
-@section('title')
-    Tambah Akun Pengguna
-@endsection
+@section('page', 'Tambah Akun Pengguna')
+@section('title', 'Tambah Akun Pengguna')
 
 @section('content')
     <div class="row">
@@ -15,7 +9,7 @@
                 <div class="card-header">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Tambah Pengguna</h5>
-                        <a href="{{ route('pengguna.index') }}" class="btn btn-secondary bg-gradient-secondary btn-sm">
+                        <a href="{{ route('pengguna.index') }}" class="btn btn-sm btn-secondary bg-gradient-secondary">
                             <i class="fa fa-arrow-left"></i> Kembali
                         </a>
                     </div>
@@ -132,7 +126,7 @@
                                         Silahkan upload foto dengan mengklik tombol Upload.
                                     </p>
                                 </div>
-                                <button type="button" class="btn btn-sm bg-gradient-dark text-white"
+                                <button type="button" class="btn btn-sm btn-dark bg-gradient-dark"
                                     id="uploadBtn_create" onclick="document.getElementById('foto').click()">
                                     <i class="fa fa-upload"></i> Upload
                                 </button>
@@ -171,7 +165,7 @@
 
                         </div>
 
-                        <button type="submit" class="btn btn-dark btn-sm">
+                        <button type="submit" class="btn btn-sm btn-dark bg-gradient-dark">
                             <li class="fa fa-save"></li> Simpan
                         </button>
                     </form>

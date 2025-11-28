@@ -3,11 +3,23 @@
 @section('page', 'Home')
 
 @section('content')
-    <div class="row mb-4">
-        <div class="col-lg-12">
+    <div class="row mb-4 align-items-center">
+        <div class="col-lg-8 col-md-7 col-12 mb-3 mb-md-0">
             <h3 class="font-weight-bolder text-uppercase mb-1">Operator Pemerintah {{ Auth::user()->wilayah->nama_wilayah }}
             </h3>
             <p class="text-muted text-sm">Pastikan Anda mengikuti tata cara yang benar dalam pengisian data.</p>
+        </div>
+        <div class="col-lg-4 col-md-5 col-12 text-md-end text-start">
+            <div class="d-inline-block px-3 py-2 border-radius-lg">
+                <p class="text-sm text-muted mb-0 font-weight-bold text-end" id="realtime-date">
+                    Memuat tanggal...
+                </p>
+                <h4 class="font-weight-bolder mb-0 d-flex align-items-center justify-content-md-end text-dark">
+                    <i class="material-symbols-rounded me-2 text-gradient text-dark fs-4">schedule</i>
+                    <span id="realtime-clock" style="min-width: 110px;">00:00:00</span>
+                    <span class="text-xs font-weight-normal ms-1 text-muted">WIB</span>
+                </h4>
+            </div>
         </div>
     </div>
 
@@ -112,7 +124,7 @@
                     @if (!isset($laporanRevisi) || $laporanRevisi->isEmpty())
                         <div class="text-center py-5">
                             <div class="icon icon-shape icon-md bg-gray-100 shadow-none text-center border-radius-lg mb-3">
-                                <i class="material-symbols-rounded text-success opacity-10 fs-4">check_circle</i>
+                                <i class="material-symbols-rounded text-success opacity-10 fs-5">check_circle</i>
                             </div>
                             <h6 class="text-sm font-weight-normal text-muted">Tidak ada revisi saat ini.</h6>
                         </div>
@@ -278,11 +290,17 @@
             const ctx = document.getElementById('chart-laporan-bulanan');
             const labelsBulan = @json($labelsBulan ?? []);
             const dataJumlah = @json($dataJumlah ?? []);
+            const currentMonthIndex = @json($currentMonthIndex);
 
             if (ctx && labelsBulan.length > 0 && dataJumlah.length > 0) {
                 const chartContext = ctx.getContext('2d');
-                const darkBlueColor = 'rgba(58, 65, 111, 0.8)';
-                const lightBlueColor = 'rgba(58, 65, 111, 1)';
+
+                const defaultColor = 'rgba(58, 65, 111, 0.6)';
+                const highlightColor = 'rgba(70, 78, 130, 0.9)';
+
+                const backgroundColors = dataJumlah.map((_, index) =>
+                    index === currentMonthIndex ? highlightColor : defaultColor
+                );
 
                 new Chart(chartContext, {
                     type: 'bar',
@@ -291,34 +309,21 @@
                         datasets: [{
                             label: 'Jumlah Laporan',
                             data: dataJumlah,
-                            backgroundColor: function(context) {
-                                const chart = context.chart;
-                                const {
-                                    ctx,
-                                    chartArea
-                                } = chart;
-                                if (!chartArea) return lightBlueColor;
-                                const gradient = ctx.createLinearGradient(0, chartArea.bottom,
-                                    0, chartArea.top);
-                                gradient.addColorStop(0, lightBlueColor);
-                                gradient.addColorStop(1, darkBlueColor);
-                                return gradient;
-                            },
-                            borderColor: darkBlueColor,
-                            borderWidth: 1,
-                            borderRadius: 5,
+                            backgroundColor: backgroundColors,
+                            borderWidth: 0,
+                            borderRadius: 4,
                             borderSkipped: false,
                         }]
                     },
                     options: {
                         responsive: true,
-                        maintainAspectRatio: false, // Penting agar tinggi mengikuti container
+                        maintainAspectRatio: false,
                         plugins: {
                             legend: {
                                 display: false
                             },
                             tooltip: {
-                                backgroundColor: '#344767',
+                                backgroundColor: 'rgb(38, 38, 38, 0.9)',
                                 titleColor: '#fff',
                                 bodyColor: '#fff',
                                 callbacks: {
@@ -327,6 +332,9 @@
                                         if (label) label += ': ';
                                         if (context.parsed.y !== null) label += context.parsed.y +
                                             ' Laporan';
+                                        if (context.dataIndex === currentMonthIndex) {
+                                            label += ' (Saat Ini)';
+                                        }
                                         return label;
                                     }
                                 }
@@ -367,13 +375,20 @@
                                 },
                                 ticks: {
                                     display: true,
-                                    color: '#6c757d',
                                     padding: 10,
+                                    color: function(context) {
+                                        return context.index === currentMonthIndex ? '#464E82' :
+                                            '#6c757d';
+                                    },
                                     font: {
                                         size: 11,
                                         family: "Inter",
                                         style: 'normal',
-                                        lineHeight: 2
+                                        lineHeight: 2,
+                                        weight: function(context) {
+                                            return context.index === currentMonthIndex ? 'bold' :
+                                                'normal';
+                                        },
                                     }
                                 }
                             }
@@ -386,6 +401,37 @@
                     chartContainer.innerHTML =
                         '<div class="alert alert-light text-center border m-0 py-3"><i class="material-symbols-rounded text-muted d-block mb-1">signal_cellular_nodata</i><span class="text-sm text-muted">Belum ada data laporan yang cukup untuk menampilkan grafik.</span></div>';
                 }
+            }
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cek apakah moment.js tersedia (sudah ada di master.blade.php)
+            if (typeof moment !== 'undefined') {
+                // Set locale ke Indonesia
+                moment.locale('id');
+
+                function updateTime() {
+                    const now = moment();
+
+                    // Update Jam (Format: 14:30:59)
+                    const timeString = now.format('HH:mm:ss');
+                    const clockElement = document.getElementById('realtime-clock');
+                    if (clockElement) clockElement.innerText = timeString;
+
+                    // Update Tanggal (Format: Senin, 25 November 2024)
+                    const dateString = now.format('dddd, D MMMM YYYY');
+                    const dateElement = document.getElementById('realtime-date');
+                    if (dateElement) dateElement.innerText = dateString;
+                }
+
+                // Jalankan fungsi update setiap 1 detik
+                setInterval(updateTime, 1000);
+
+                // Jalankan segera saat load agar tidak ada delay tampilan
+                updateTime();
+            } else {
+                console.error('Moment.js tidak ditemukan. Pastikan sudah di-load di master layout.');
             }
         });
     </script>

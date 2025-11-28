@@ -153,8 +153,16 @@ class LaporanPenguatanIdeologiController extends Controller
             ->addColumn('operator', function ($laporan) {
                 return $laporan->operator->nama ?? '<span class="text-danger">Operator Dihapus</span>';
             })
+            ->filterColumn('operator', function ($query, $keyword) {
+                $query->whereHas('operator', function ($q) use ($keyword) {
+                    $q->where('nama', 'like', "%{$keyword}%");
+                });
+            })
             ->editColumn('tanggal_laporan', function ($laporan) {
                 return Carbon::parse($laporan->tanggal_laporan)->isoFormat('D MMMM YYYY');
+            })
+            ->filterColumn('tanggal_laporan', function ($query, $keyword) {
+                $query->whereRaw("DATE_FORMAT(tanggal_laporan,'%d %M %Y') like ?", ["%{$keyword}%"]);
             })
             ->editColumn('status_laporan', function ($laporan) {
                 if ($laporan->status_laporan == 'disetujui') {
@@ -166,12 +174,10 @@ class LaporanPenguatanIdeologiController extends Controller
                 }
             })
             ->addColumn('aksi', function ($laporan) {
-                // [MODIFIKASI] Tambahkan $showUrl
                 $editUrl = route('laporan_penguatan_ideologi.edit', ['laporan_penguatan_ideologi' => $laporan->id_laporan]);
                 $showUrl = route('laporan_penguatan_ideologi.show', ['laporan_penguatan_ideologi' => $laporan->id_laporan]);
                 $deleteUrl = route('laporan_penguatan_ideologi.destroy', ['laporan_penguatan_ideologi' => $laporan->id_laporan]);
 
-                // [MODIFIKASI] Tambahkan tombol "Lihat"
                 return '
                 <div class="d-flex justify-content-start gap-2">
                 <a href="' . $editUrl . '" class="btn btn-sm btn-dark bg-gradient-dark"><i class="fa fa-edit"></i> Edit</a>

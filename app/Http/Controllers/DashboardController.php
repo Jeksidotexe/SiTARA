@@ -51,24 +51,27 @@ class DashboardController extends Controller
                     $laporanGlobalPerBulan[$bulan] += $jumlah;
                 }
             }
+
+            $currentMonthIndex = now()->month - 1;
             $labelsBulanGlobal = [];
             $dataJumlahGlobal = [];
+
             for ($i = 1; $i <= 12; $i++) {
                 try {
-                    $labelsBulanGlobal[] = Carbon::create()->month($i)->locale('id')->isoFormat('MMM');
+                    $labelsBulanGlobal[] = Carbon::create()->month($i)->locale('id')->isoFormat('MMMM');
                 } catch (\Exception $e) {
                     $labelsBulanGlobal[] = Carbon::create()->month($i)->format('M');
                 }
                 $dataJumlahGlobal[] = $laporanGlobalPerBulan[$i] ?? 0;
             }
 
-
             return view('dashboard.admin.index', compact(
                 'totalLaporan',
                 'totalUsers',
                 'totalWilayah',
                 'labelsBulanGlobal',
-                'dataJumlahGlobal'
+                'dataJumlahGlobal',
+                'currentMonthIndex'
             ));
         }
         // --- DASHBOARD OPERATOR ---
@@ -116,6 +119,7 @@ class DashboardController extends Controller
                 }
             }
 
+            $currentMonthIndex = now()->month - 1;
             $labelsBulan = [];
             $dataJumlah = [];
             for ($i = 1; $i <= 12; $i++) {
@@ -133,9 +137,11 @@ class DashboardController extends Controller
                 'laporanMenunggu',
                 'totalLaporanOperator',
                 'labelsBulan',
-                'dataJumlah'
+                'dataJumlah',
+                'currentMonthIndex'
             ));
         }
+
         // --- DASHBOARD PIMPINAN ---
         elseif ($role == 'pimpinan') {
             $pimpinanWilayahId = $user->id_wilayah;
@@ -176,6 +182,7 @@ class DashboardController extends Controller
 
             $laporanPending = $allLaporanPending->sortByDesc('created_at')->take(10);
 
+            $currentMonthIndex = now()->month - 1;
             $labelsBulan = [];
             $dataJumlah = [];
             for ($i = 1; $i <= 12; $i++) {
@@ -192,7 +199,8 @@ class DashboardController extends Controller
                 'countPending',
                 'countApproved',
                 'labelsBulan',
-                'dataJumlah'
+                'dataJumlah',
+                'currentMonthIndex'
             ));
         } else {
             abort(403, 'Role tidak dikenali.');

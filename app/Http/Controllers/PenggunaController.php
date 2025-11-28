@@ -46,8 +46,8 @@ class PenggunaController extends Controller
             ->addColumn('aksi', function ($pengguna) {
                 return '
                 <div class="d-flex justify-content-start gap-2">
-                    <a href="' . route('pengguna.edit', $pengguna->id_users) . '" class="btn btn-sm btn-dark"><i class="fa fa-edit"></i> Edit</a>
-                    <button onclick="deleteData(`' . route('pengguna.destroy', $pengguna->id_users) . '`)" class="btn btn-sm btn-danger"><i class="fa fa-trash"></i> Hapus</button>
+                    <a href="' . route('pengguna.edit', $pengguna->id_users) . '" class="btn btn-sm btn-warning bg-gradient-warning text-dark"><i class="fa fa-edit"></i> Edit</a>
+                    <button onclick="deleteData(`' . route('pengguna.destroy', $pengguna->id_users) . '`)" class="btn btn-sm btn-danger bg-gradient-danger"><i class="fa fa-trash"></i> Hapus</button>
                 </div>
                 ';
             })

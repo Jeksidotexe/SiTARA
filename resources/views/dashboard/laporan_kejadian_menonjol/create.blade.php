@@ -1,5 +1,4 @@
 @extends('layouts.master')
-
 @section('page', 'Tambah Laporan Harian Kejadian Menonjol')
 @section('title', 'Tambah Laporan Harian Kejadian Menonjol')
 
@@ -13,7 +12,6 @@
             display: block;
         }
 
-        /* Styling TinyMCE */
         .tox-tinymce {
             border: 1px solid #dad2d2;
             border-radius: 0.375rem;
@@ -24,13 +22,10 @@
             font-size: 0.875rem;
         }
 
-        /* SEMBUNYIKAN INPUT FILE ASLI */
         input[type="file"].custom-file-input {
             display: none;
         }
 
-
-        /* STYLING DAFTAR FILE YANG DIPILIH */
         .file-list-container {
             margin-top: 15px;
             border: 1px solid #d2d6da;
@@ -60,12 +55,10 @@
 
         .file-list-item .file-size {
             color: #6c757d;
-            /* text-muted */
             font-size: 0.85rem;
             margin-left: 10px;
         }
 
-        /* Container untuk thumbnail atau icon */
         .file-preview-thumbnail {
             width: 50px;
             height: 50px;
@@ -77,18 +70,14 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            /* Untuk memotong gambar agar pas */
         }
 
-        /* Style untuk thumbnail gambar */
         .file-preview-thumbnail img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            /* Membuat gambar mengisi container */
         }
 
-        /* Style untuk icon (jika bukan gambar) */
         .file-preview-thumbnail .file-icon {
             font-size: 1.5rem;
             color: #6c757d;
@@ -96,13 +85,11 @@
 
         .file-list-item .file-info {
             flex-grow: 1;
-            /* Membuat info file mengisi sisa ruang */
             margin-right: 10px;
         }
 
         .file-list-item .btn {
             flex-shrink: 0;
-            /* Mencegah tombol hapus mengecil */
         }
     </style>
 @endpush
@@ -115,7 +102,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Tambah Laporan Harian Kejadian Menonjol</h5>
                         <a href="{{ route('laporan_kejadian_menonjol.index') }}"
-                            class="btn btn-secondary bg-gradient-secondary btn-sm">
+                            class="btn btn-sm btn-secondary bg-gradient-secondary">
                             <i class="fa fa-arrow-left"></i> Kembali
                         </a>
                     </div>
@@ -190,7 +177,7 @@
                                                 onchange="addFilesToDataTransfer('{{ $step['file'] }}', 'file-list-{{ $key }}')"
                                                 accept="image/*">
 
-                                            <label for="{{ $step['file'] }}" class="btn btn-sm bg-gradient-dark">
+                                            <label for="{{ $step['file'] }}" class="btn btn-sm btn-dark bg-gradient-dark">
                                                 <i class="fa fa-upload"></i> Pilih File
                                             </label>
                                         </div>
@@ -240,7 +227,7 @@
                     <div id="previewFallback" style="display: none;">
                         <i class="fa fa-file-alt" style="font-size: 80px; color: #6c757d;"></i>
                         <p class="mt-3">Pratinjau tidak tersedia untuk tipe file ini.</p>
-                        <a href="" id="previewDownloadLink" class="btn btn-dark" target="_blank">
+                        <a href="" id="previewDownloadLink" class="btn btn-sm btn-dark bg-gradient-dark" target="_blank">
                             <i class="fa fa-download"></i> Download File
                         </a>
                     </div>
@@ -331,13 +318,13 @@
 
                 const previewBtn = document.createElement('button');
                 previewBtn.type = 'button';
-                previewBtn.className = 'btn btn-dark bg-gradient-dark btn-sm me-1';
+                previewBtn.className = 'btn btn-sm btn-dark bg-gradient-dark me-1';
                 previewBtn.innerHTML = '<i class="fa fa-eye"></i>';
                 previewBtn.disabled = true;
 
                 const removeBtn = document.createElement('button');
                 removeBtn.type = 'button';
-                removeBtn.className = 'btn btn-danger btn-sm';
+                removeBtn.className = 'btn btn-sm btn-danger bg-gradient-danger';
                 removeBtn.innerHTML = '<i class="fa fa-trash"></i>';
 
                 removeBtn.onclick = function() {
@@ -370,10 +357,9 @@
             input.files = files;
         }
 
-        // --- FUNGSI UTAMA DENGAN VALIDASI TOAST ---
         function addFilesToDataTransfer(inputId, containerId) {
             const input = document.getElementById(inputId);
-            const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB in bytes
+            const MAX_FILE_SIZE = 2 * 1024 * 1024;
 
             if (!fileUploads[inputId]) {
                 fileUploads[inputId] = new DataTransfer();
@@ -403,9 +389,7 @@
                 }
             }
 
-            // --- PERUBAHAN: MENGGUNAKAN TOAST (TANPA LIST) ---
             if (rejectedFilesType.length > 0) {
-                // Gabungkan nama file dengan <br>
                 let message = 'File berikut ditolak (hanya gambar):<br>' + rejectedFilesType.join('<br>');
 
                 if (typeof showMaterialToast === 'function') {
@@ -417,7 +401,6 @@
             }
 
             if (rejectedFilesSize.length > 0) {
-                // Gabungkan nama file dengan <br>
                 let message = 'File berikut ditolak (melebihi 2MB):<br>' + rejectedFilesSize.join('<br>');
 
                 if (typeof showMaterialToast === 'function') {
@@ -427,7 +410,6 @@
                         '\n- '));
                 }
             }
-            // --- AKHIR PERUBAHAN ---
 
             renderFileList(inputId, containerId);
         }

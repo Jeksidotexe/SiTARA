@@ -1,16 +1,7 @@
 @extends('layouts.master')
-
-@section('page')
-    Data Wilayah
-@endsection
-
-@section('sub-page')
-    Edit Wilayah
-@endsection
-
-@section('title')
-    Edit Wilayah
-@endsection
+@section('page', 'Daftar Wilayah')
+@section('sub-page', 'Edit Wilayah')
+@section('title', 'Edit Wilayah')
 
 @section('content')
     <div class="row">
@@ -19,7 +10,7 @@
                 <div class="card-header">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Edit Wilayah</h5>
-                        <a href="{{ route('wilayah.index') }}" class="btn btn-secondary bg-gradient-secondary btn-sm">
+                        <a href="{{ route('wilayah.index') }}" class="btn btn-sm btn-secondary bg-gradient-secondary">
                             <i class="fa fa-arrow-left"></i> Kembali
                         </a>
                     </div>
@@ -62,8 +53,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        {{-- [BARU] Input Latitude dan Longitude --}}
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
@@ -83,9 +72,7 @@
                                 </div>
                             </div>
                         </div>
-                        {{-- [AKHIR BARU] --}}
-
-                        <button type="submit" class="btn btn-dark"><i class="fa fa-save"></i> Simpan Perubahan</button>
+                        <button type="submit" class="btn btn-sm btn-dark bg-gradient-dark"><i class="fa fa-save"></i> Simpan Perubahan</button>
                     </form>
                 </div>
             </div>

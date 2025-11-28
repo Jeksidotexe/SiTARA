@@ -2,45 +2,30 @@
 @section('title', 'Dashboard')
 @section('page', 'Home')
 
-{{-- [MODIFIKASI] Menambahkan style untuk DataTables, tombol "Reset View", dan POPUP BARU --}}
 @push('styles')
-    {{-- [BARU] CSS DataTables Bootstrap 5 --}}
-    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/3.0.2/css/responsive.bootstrap5.min.css">
-
     <style>
-        /* [BARU] CSS untuk Popup Peta Kustom yang Modern */
         .custom-leaflet-popup .leaflet-popup-content-wrapper {
             background: rgba(40, 40, 40, 0.9);
-            /* Latar belakang gelap semi-transparan */
             color: #f8f9fa;
-            /* Teks terang */
             border: none;
             border-radius: 0.5rem;
-            /* Sesuai card style */
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(5px);
-            /* Efek blur (jika didukung) */
             -webkit-backdrop-filter: blur(5px);
         }
 
         .custom-leaflet-popup .leaflet-popup-content {
             padding: 0;
-            /* Hapus padding default */
             font-family: "Inter", sans-serif;
-            /* Sesuaikan font */
             line-height: 1.5;
             margin: 0;
             min-width: 200px;
-            /* Atur lebar minimum */
         }
 
         .custom-leaflet-popup .leaflet-popup-tip {
             background: rgba(40, 40, 40, 0.9);
-            /* Cocokkan dengan wrapper */
         }
 
-        /* [BARU] CSS untuk konten di dalam popup */
         .popup-title {
             font-size: 1rem;
             font-weight: 600;
@@ -60,12 +45,8 @@
 
         .popup-status .badge {
             margin-left: 10px;
-            /* Jarak antara "Status:" dan badge */
         }
 
-        /* Akhir CSS Popup Kustom */
-
-        /* [BARU] CSS untuk marker "Neon Pulse" */
         .neon-marker {
             position: relative;
             width: 14px;
@@ -100,7 +81,6 @@
             background-color: transparent;
         }
 
-        /* AMAN (Hijau) */
         .marker-aman {
             background-color: #00e676;
         }
@@ -109,7 +89,6 @@
             box-shadow: 0 0 12px 4px #00e676;
         }
 
-        /* SIAGA (Kuning/Oranye) */
         .marker-siaga {
             background-color: #ffeb3b;
         }
@@ -123,7 +102,6 @@
             border: 2px solid #ffeb3b;
         }
 
-        /* BAHAYA (Merah) */
         .marker-bahaya {
             background-color: #f44336;
         }
@@ -153,7 +131,6 @@
             }
         }
 
-        /* [FIX] Menghilangkan border persegi pada marker */
         .leaflet-div-icon {
             background: none !important;
             border: none !important;
@@ -162,7 +139,6 @@
             box-shadow: none !important;
         }
 
-        /* CSS untuk tombol "Locate Me" kustom */
         .leaflet-control-locate a {
             background-color: #fff;
             width: 30px;
@@ -186,7 +162,6 @@
             border-radius: 4px;
         }
 
-        /* [BARU] CSS untuk tombol "Reset View" kustom */
         .leaflet-control-reset-view a {
             background-color: #fff;
             width: 30px;
@@ -209,18 +184,14 @@
         .leaflet-bar .leaflet-control-reset-view {
             border-radius: 4px;
             margin-top: 5px;
-            /* Memberi jarak dari tombol di atasnya */
         }
 
-
-        /* [MODIFIKASI] CSS untuk DataTables agar rapi */
         #wilayah-datatable_wrapper .dataTables-length,
         #wilayah-datatable_wrapper .dataTables-filter {
             padding: 0;
         }
 
         #wilayah-datatable_wrapper .dataTables-filter input {
-            /* Input search dari Material Dashboard */
             display: block;
             width: 100%;
             padding: 0.5rem 0.75rem;
@@ -248,7 +219,6 @@
             justify-content: end;
         }
 
-        /* Memastikan tabel tidak keluar dari card body */
         .table-responsive {
             overflow-x: hidden;
         }
@@ -260,19 +230,28 @@
 @endpush
 
 @section('content')
-    {{-- Baris Header --}}
-    <div class="row mb-4">
-        <div class="col-lg-12">
+    <div class="row mb-4 align-items-center">
+        <div class="col-lg-6 col-md-7 col-12 mb-3 mb-md-0">
             <h3 class="font-weight-bolder text-uppercase mb-1">Admin {{ Auth::user()->wilayah->nama_wilayah }}</h3>
-            <p class="text-muted text-sm">Selamat datang, {{ Auth::user()->nama }}. Ringkasan data sistem.</p>
+            <p class="text-muted text-sm mb-0">Selamat datang, {{ Auth::user()->nama }}. Ringkasan data sistem.</p>
+        </div>
+
+        <div class="col-lg-6 col-md-5 col-12 text-md-end text-start">
+            <div class="d-inline-block px-3 py-2 border-radius-lg">
+                <p class="text-sm text-muted mb-0 font-weight-bold text-end" id="realtime-date">
+                    Memuat tanggal...
+                </p>
+                <h4 class="font-weight-bolder mb-0 d-flex align-items-center justify-content-md-end text-dark">
+                    <i class="material-symbols-rounded me-2 text-gradient text-dark fs-4">schedule</i>
+                    <span id="realtime-clock" style="min-width: 110px;">00:00:00</span>
+                    <span class="text-xs font-weight-normal ms-1 text-muted">WIB</span>
+                </h4>
+            </div>
         </div>
     </div>
 
-    {{-- [MODIFIKASI] Baris Kartu Statistik dan Chart --}}
     <div class="row">
-        {{-- Kolom Kiri: 3 Kartu Statistik Vertikal --}}
         <div class="col-lg-4 d-flex flex-column">
-            {{-- Card: Total Laporan --}}
             <div class="card card-body border-radius-lg shadow-sm mb-4">
                 <div class="row align-items-center">
                     <div class="col-8">
@@ -291,10 +270,9 @@
                     </div>
                 </div>
                 <hr class="dark horizontal my-2">
-                <p class="mb-0 pt-1 text-sm text-secondary">Semua tipe laporan.</p>
+                <p class="mb-0 pt-1 text-sm text-secondary">Semua kategori laporan.</p>
             </div>
 
-            {{-- Card: Total Pengguna --}}
             <div class="card card-body border-radius-lg shadow-sm mb-4">
                 <div class="row align-items-center">
                     <div class="col-8">
@@ -318,8 +296,7 @@
                 </a>
             </div>
 
-            {{-- Card: Total Wilayah --}}
-            <div class="card card-body border-radius-lg shadow-sm mb-lg-0 mb-4"> {{-- Hapus margin bawah di tampilan lg --}}
+            <div class="card card-body border-radius-lg shadow-sm mb-lg-0 mb-4">
                 <div class="row align-items-center">
                     <div class="col-8">
                         <div class="numbers">
@@ -342,11 +319,9 @@
                 </a>
             </div>
         </div>
-        {{-- Akhir Kolom Kiri --}}
 
-        {{-- Kolom Kanan: 1 Kartu Chart --}}
         <div class="col-lg-8">
-            <div class="card shadow-sm h-100"> {{-- Tambah h-100 agar tinggi kartu sama --}}
+            <div class="card shadow-sm h-100">
                 <div class="card-header pb-0 pt-3 bg-transparent">
                     <h6 class="mb-0 font-weight-bold d-flex align-items-center">
                         <i class="material-symbols-rounded text-dark me-2 fs-5">bar_chart</i>
@@ -356,38 +331,31 @@
                         Grafik ini menunjukkan total semua laporan setiap bulan.
                     </p>
                 </div>
-                {{-- Tambah d-flex dan flex-column agar chart bisa tumbuh --}}
                 <div class="card-body p-3 d-flex flex-column">
-                    <div class="chart flex-grow-1"> {{-- Tambah flex-grow-1 agar chart mengisi sisa ruang --}}
-                        {{-- Hapus height="300" agar chart responsif terhadap tinggi card --}}
+                    <div class="chart flex-grow-1">
                         <canvas id="chart-laporan-global" class="chart-canvas"></canvas>
                     </div>
                 </div>
             </div>
         </div>
-        {{-- Akhir Kolom Kanan --}}
 
     </div>
-    {{-- Akhir Baris Modifikasi --}}
 
-
-    {{-- Baris Peta Monitoring dan Daftar Wilayah --}}
     <div class="row mt-4">
-        {{-- Kolom Peta (8 Kolom) --}}
         <div class="col-lg-7 mb-lg-0 mb-4">
             <div class="card shadow-sm">
                 <div class="card-header pb-0 pt-3 bg-transparent">
                     <div class="d-flex justify-content-between align-items-center">
                         <h6 class="mb-0 font-weight-bold d-flex align-items-center">
                             <i class="material-symbols-rounded text-dark me-2 fs-5">public</i>
-                            Peta Monitoring Situasi Wilayah
+                            Peta Monitoring Situasi Daerah Kabupaten/Kota
                         </h6>
                         <span class="badge badge-sm bg-gradient-light text-dark" id="map-status-badge">
                             <i class="fas fa-sync-alt fa-spin me-1"></i> Memuat data...
                         </span>
                     </div>
                     <p class="text-sm text-muted mt-1 mb-0">
-                        Monitoring status wilayah secara real-time.
+                        Real-time monitoring situasi daerah
                     </p>
                 </div>
                 <div class="card-body p-3">
@@ -396,13 +364,11 @@
             </div>
         </div>
 
-        {{-- [MODIFIKASI] Kolom Daftar Status Wilayah (4 Kolom) --}}
         <div class="col-lg-5">
-            <div class="card shadow-sm h-100"> {{-- [UBAH] Tambah h-100 --}}
+            <div class="card shadow-sm h-100">
                 <div class="card-header pb-0 pt-3 bg-transparent">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            {{-- Judul H6 --}}
                             <h6 class="mb-0 font-weight-bold d-flex align-items-center">
                                 <i class="material-symbols-rounded text-dark me-2 fs-5">format_list_bulleted</i>
                                 Daftar Wilayah
@@ -411,20 +377,22 @@
                                 Semua wilayah beserta statusnya.
                             </p>
                         </div>
-                        {{-- [BARU] Input pencarian kustom --}}
                         <div class="ms-3" style="width: 150px;">
-                            {{-- Kita gunakan class 'form-control-sm' agar ukurannya pas --}}
                             <input type="text" id="custom-wilayah-search" class="form-control form-control-sm"
                                 placeholder="Cari wilayah...">
                         </div>
                     </div>
                 </div>
                 <div class="card-body p-3">
-                    {{-- [UBAH] Ganti div list dengan struktur table --}}
-                    <div class="table-responsive">
+                    <div id="wilayah-loading" class="text-center py-5">
+                        <div class="spinner-border text-info" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="text-sm text-muted mt-2 mb-0 font-weight-bold">Sedang memuat data wilayah...</p>
+                    </div>
+
+                    <div class="table-responsive d-none" id="wilayah-table-container">
                         <table id="wilayah-datatable" class="table table-hover align-middle w-100">
-                            {{-- Header tabel akan di-generate oleh JS,
-                                 tapi bisa juga ditambahkan di sini untuk kejelasan --}}
                             <thead>
                                 <tr>
                                     <th>Wilayah</th>
@@ -443,32 +411,19 @@
 
 @endsection
 
-{{-- Script untuk Grafik dan Peta --}}
 @push('scripts')
-    {{-- [BARU] Tambahkan JS untuk DataTables (jika belum ada di master) --}}
-    {{-- Pastikan jQuery sudah dimuat sebelum ini --}}
-    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap5.min.js"></script>
-    <script src="https://cdn.datatables.net/responsive/3.0.2/js/dataTables.responsive.min.js"></script>
-    <script src="https://cdn.datatables.net/responsive/3.0.2/js/responsive.bootstrap5.min.js"></script>
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // =========================================================
-            // [MODIFIKASI] KODE UNTUK PETA DAN DAFTAR WILAYAH (DATATABLES)
-            // =========================================================
             let map;
             let markersLayer;
             let myLocationMarker = null;
             const mapStatusBadge = document.getElementById('map-status-badge');
 
-            // [BARU] Variabel untuk menyimpan referensi ke marker di peta
             let markerReferences = {};
 
-            const defaultCenter = [-0.5, 111.4];
+            const defaultCenter = [-0.3, 110];
             const defaultZoom = 7;
 
-            // [BARU] 1. Inisialisasi DataTable (dulu, sebelum map)
             let wilayahTable = new DataTable('#wilayah-datatable', {
                 columns: [{
                         data: 'nama_wilayah',
@@ -499,12 +454,10 @@
                 dom: 't<"d-none"r>'
             });
 
-            // Hubungkan input kustom kita ke API search DataTables
             document.getElementById('custom-wilayah-search').addEventListener('keyup', function() {
                 wilayahTable.search(this.value).draw();
             });
 
-            // 2. Inisialisasi Peta
             try {
                 map = L.map('map').setView(defaultCenter, defaultZoom);
                 L.tileLayer(
@@ -520,7 +473,6 @@
                 return;
             }
 
-            // 3. Tambahkan kontrol fullscreen
             try {
                 map.addControl(new L.Control.Fullscreen({
                     position: 'topleft'
@@ -529,7 +481,6 @@
                 console.warn("Plugin Fullscreen (Mapbox) gagal dimuat. Error:", e);
             }
 
-            // 4. Buat Tombol "Lacak Lokasi Saya" Kustom
             L.Control.LocateMe = L.Control.extend({
                 onAdd: function(map) {
                     var container = L.DomUtil.create('div',
@@ -554,7 +505,6 @@
                 position: 'topleft'
             }).addTo(map);
 
-            // 5. Buat Tombol "Reset View" Kustom
             L.Control.ResetView = L.Control.extend({
                 onAdd: function(map) {
                     var container = L.DomUtil.create('div',
@@ -580,7 +530,6 @@
                 position: 'topleft'
             }).addTo(map);
 
-            // 6. Handle hasil pelacakan lokasi
             map.on('locationfound', function(e) {
                 if (myLocationMarker) {
                     map.removeLayer(myLocationMarker);
@@ -597,7 +546,7 @@
                     }).addTo(map)
                     .bindPopup(popupHtml, {
                         className: 'custom-leaflet-popup'
-                    }) // Terapkan class
+                    })
                     .openPopup();
 
                 if (typeof showMaterialToast === 'function') {
@@ -611,7 +560,6 @@
                 }
             });
 
-            // 7. Fungsi untuk membuat Ikon "Neon Pulse" (Tidak berubah)
             function getWilayahIcon(status) {
                 let statusClass = 'marker-default';
                 if (status === 'Aman') statusClass = 'marker-aman';
@@ -626,7 +574,6 @@
                 });
             }
 
-            // 8. Helper untuk mendapatkan kelas badge Bootstrap (Tidak berubah)
             function getBadgeClass(status) {
                 if (status === 'Aman') return 'bg-gradient-success';
                 if (status === 'Siaga') return 'bg-gradient-warning';
@@ -634,11 +581,14 @@
                 return 'bg-gradient-secondary';
             }
 
-            // 9. [MODIFIKASI] Fungsi untuk Memuat/Me-refresh Peta dan DATATABLE
             let dataGagalDimuat = false;
 
             function loadMapData() {
                 if (dataGagalDimuat) return;
+
+                // (Optional) Reset tampilan loading jika dipanggil ulang
+                document.getElementById('wilayah-loading').classList.remove('d-none');
+                document.getElementById('wilayah-table-container').classList.add('d-none');
 
                 if (mapStatusBadge) {
                     mapStatusBadge.innerHTML =
@@ -652,10 +602,13 @@
                         return response.json();
                     })
                     .then(data => {
+                        document.getElementById('wilayah-loading').classList.add('d-none');
+                        document.getElementById('wilayah-table-container').classList.remove('d-none');
+
                         if (data.error) throw new Error(data.error);
 
                         markersLayer.clearLayers();
-                        markerReferences = {}; // Reset referensi
+                        markerReferences = {};
 
                         if (data.length === 0) {
                             if (mapStatusBadge) {
@@ -672,7 +625,6 @@
                         let bounds = [];
 
                         data.forEach(wilayah => {
-                            // Bagian Peta
                             if (wilayah.lat && wilayah.lng) {
                                 const lat = parseFloat(wilayah.lat);
                                 const lng = parseFloat(wilayah.lng);
@@ -683,7 +635,6 @@
                                         icon: icon
                                     });
 
-                                    // Buat HTML kustom untuk popup
                                     const popupHtml = `
                                         <div class="popup-title">${wilayah.nama_wilayah}</div>
                                         <hr class="light horizontal my-0">
@@ -692,35 +643,32 @@
                                             <span class="badge badge-sm ${getBadgeClass(wilayah.status_wilayah)}">${wilayah.status_wilayah}</span>
                                         </div>`;
 
-                                    // Terapkan HTML dan class kustom
                                     marker.bindPopup(popupHtml, {
                                         className: 'custom-leaflet-popup'
                                     });
 
-                                    // --- [INI TAMBAHAN BARUNYA] ---
-                                    // Tambahkan event listener 'click' ke marker
                                     marker.on('click', function(e) {
-                                        // 'e.latlng' berisi koordinat marker yang diklik
-                                        map.flyTo(e.latlng, 15, { // Zoom 15 (level kota)
+                                        map.flyTo(e.latlng, 15, {
                                             animate: true,
-                                            duration: 1 // 1 detik
+                                            duration: 1
                                         });
-                                        // Popup akan terbuka secara otomatis karena sudah di-bind.
                                     });
-                                    // --- [AKHIR TAMBAHAN BARU] ---
 
                                     markersLayer.addLayer(marker);
                                     bounds.push([lat, lng]);
 
-                                    // Simpan referensi marker menggunakan nama wilayah sebagai key
                                     markerReferences[wilayah.nama_wilayah] = marker;
                                 }
                             }
                         });
 
-                        // Isi DataTable
                         if (wilayahTable) {
                             wilayahTable.clear().rows.add(data).draw();
+                            wilayahTable.columns.adjust();
+
+                            if (wilayahTable.responsive) {
+                                wilayahTable.responsive.recalc();
+                            }
                         }
 
                         if (bounds.length === 0) {
@@ -736,6 +684,10 @@
                     .catch(error => {
                         console.error('Error memuat data peta/wilayah:', error.message);
                         dataGagalDimuat = true;
+
+                        document.getElementById('wilayah-loading').classList.add('d-none');
+                        document.getElementById('wilayah-table-container').classList.remove('d-none');
+
                         if (mapStatusBadge) {
                             mapStatusBadge.innerHTML =
                                 '<i class="fas fa-exclamation-triangle me-1"></i> Gagal Memuat Data';
@@ -750,10 +702,8 @@
                     });
             }
 
-            // 10. Muat data pertama kali
             loadMapData();
 
-            // 11. [REAL-TIME FIX] Dengarkan Event 'WilayahUpdated'
             try {
                 window.Echo.channel('wilayah-updates')
                     .listen('.WilayahUpdated', (e) => {
@@ -808,11 +758,7 @@
                 }
             }
 
-            // =========================================================
-            // [BLOK BARU] MENANGANI KLIK PADA BARIS DATATABLES
-            // =========================================================
             $('#wilayah-datatable tbody').on('click', 'tr', function(e) {
-                // Dapatkan data untuk baris yang diklik
                 const rowData = wilayahTable.row(this).data();
 
                 if (rowData && rowData.lat && rowData.lng) {
@@ -820,19 +766,16 @@
                     const lng = parseFloat(rowData.lng);
 
                     if (!isNaN(lat) && !isNaN(lng)) {
-                        // 1. Pindahkan peta ke lokasi
-                        map.flyTo([lat, lng], 15, { // Zoom 15 adalah level kota
+                        map.flyTo([lat, lng], 15, {
                             animate: true,
-                            duration: 1 // Durasi 1 detik
+                            duration: 1
                         });
 
-                        // 2. Buka popup marker yang sesuai
                         const marker = markerReferences[rowData.nama_wilayah];
                         if (marker) {
-                            // Tambahkan timeout kecil agar popup terbuka SETELAH map selesai terbang
                             setTimeout(() => {
                                 marker.openPopup();
-                            }, 1000); // 1000ms = 1 detik (sesuai durasi flyTo)
+                            }, 1000);
                         }
                     } else {
                         if (typeof showMaterialToast === 'function') {
@@ -844,15 +787,17 @@
                 }
             });
 
-
-            // =========================================================
-            // KODE ANDA YANG SUDAH ADA UNTUK GRAFIK (TIDAK BERUBAH)
-            // =========================================================
             const ctxGlobal = document.getElementById('chart-laporan-global').getContext('2d');
             const labelsBulanGlobal = @json($labelsBulanGlobal);
             const dataJumlahGlobal = @json($dataJumlahGlobal);
-            const primaryColor = 'rgba(58, 65, 111, 0.8)';
-            const primaryColorBorder = 'rgba(58, 65, 111, 1)';
+            const currentMonthIndex = @json($currentMonthIndex);
+
+            const defaultColor = 'rgba(58, 65, 111, 0.6)';
+            const highlightColor = 'rgba(70, 78, 130, 0.9)';
+
+            const backgroundColors = dataJumlahGlobal.map((_, index) =>
+                index === currentMonthIndex ? highlightColor : defaultColor
+            );
 
             new Chart(ctxGlobal, {
                 type: 'bar',
@@ -861,10 +806,9 @@
                     datasets: [{
                         label: 'Jumlah Laporan',
                         data: dataJumlahGlobal,
-                        backgroundColor: primaryColor,
-                        borderColor: primaryColorBorder,
-                        borderWidth: 1,
-                        borderRadius: 5,
+                        backgroundColor: backgroundColors,
+                        borderWidth: 0,
+                        borderRadius: 4,
                         borderSkipped: false,
                     }]
                 },
@@ -876,7 +820,7 @@
                             display: false
                         },
                         tooltip: {
-                            backgroundColor: '#344767',
+                            backgroundColor: 'rgb(38, 38, 38, 0.9)',
                             titleColor: '#fff',
                             bodyColor: '#fff',
                             callbacks: {
@@ -887,6 +831,9 @@
                                     }
                                     if (context.parsed.y !== null) {
                                         label += context.parsed.y + ' Laporan';
+                                    }
+                                    if (context.dataIndex === currentMonthIndex) {
+                                        label += ' (Saat Ini)';
                                     }
                                     return label;
                                 }
@@ -930,9 +877,13 @@
                             },
                             ticks: {
                                 display: true,
-                                color: '#6c757d',
-                                padding: 10,
+                                color: function(context) {
+                                    return context.index === currentMonthIndex ? '#464E82' : '#6c757d';
+                                },
                                 font: {
+                                    weight: function(context) {
+                                        return context.index === currentMonthIndex ? 'bold' : 'normal';
+                                    },
                                     size: 11,
                                     family: "Inter",
                                     style: 'normal',
@@ -943,6 +894,37 @@
                     }
                 }
             });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cek apakah moment.js tersedia (sudah ada di master.blade.php)
+            if (typeof moment !== 'undefined') {
+                // Set locale ke Indonesia
+                moment.locale('id');
+
+                function updateTime() {
+                    const now = moment();
+
+                    // Update Jam (Format: 14:30:59)
+                    const timeString = now.format('HH:mm:ss');
+                    const clockElement = document.getElementById('realtime-clock');
+                    if (clockElement) clockElement.innerText = timeString;
+
+                    // Update Tanggal (Format: Senin, 25 November 2024)
+                    const dateString = now.format('dddd, D MMMM YYYY');
+                    const dateElement = document.getElementById('realtime-date');
+                    if (dateElement) dateElement.innerText = dateString;
+                }
+
+                // Jalankan fungsi update setiap 1 detik
+                setInterval(updateTime, 1000);
+
+                // Jalankan segera saat load agar tidak ada delay tampilan
+                updateTime();
+            } else {
+                console.error('Moment.js tidak ditemukan. Pastikan sudah di-load di master layout.');
+            }
         });
     </script>
 @endpush

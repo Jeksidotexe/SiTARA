@@ -139,28 +139,33 @@ class LaporanKejadianMenonjolController extends Controller
     {
         $user = Auth::user();
 
-        // [PERBAIKAN] Mulai query builder
         $query = LaporanKejadianMenonjol::with('operator')
             ->latest('id_laporan');
 
-        // [PERBAIKAN] Terapkan filter berdasarkan Role Operator
-        // Route ini dilindungi oleh middleware 'role:operator' di web.php
         $query->where('id_operator', $user->id_users);
 
         return datatables()
-            ->of($query) // [PERBAIKAN] Gunakan $query
+            ->of($query)
             ->addIndexColumn()
             ->addColumn('operator', function ($laporan) {
                 return $laporan->operator->nama ?? '<span class="text-danger">Operator Dihapus</span>';
             })
+            ->filterColumn('operator', function ($query, $keyword) {
+                $query->whereHas('operator', function ($q) use ($keyword) {
+                    $q->where('nama', 'like', "%{$keyword}%");
+                });
+            })
             ->editColumn('tanggal_laporan', function ($laporan) {
                 return Carbon::parse($laporan->tanggal_laporan)->isoFormat('D MMMM YYYY');
+            })
+            ->filterColumn('tanggal_laporan', function ($query, $keyword) {
+                $query->whereRaw("DATE_FORMAT(tanggal_laporan,'%d %M %Y') like ?", ["%{$keyword}%"]);
             })
             ->editColumn('status_laporan', function ($laporan) {
                 if ($laporan->status_laporan == 'disetujui') {
                     return '<span class="badge badge-sm bg-gradient-success"><i class="fas fa-circle-check"></i> Disetujui</span>';
                 } elseif ($laporan->status_laporan == 'revisi') {
-                    return '<span class="badge badge-sm bg-gradient-warning"><i class="fas fa-exclamation-triangle"></i> Revisi</span>';
+                    return '<span class="badge badge-sm bg-gradient-warning text-dark"><i class="fas fa-exclamation-triangle"></i> Revisi</span>';
                 } else {
                     return '<span class="badge badge-sm bg-gradient-info"><i class="fas fa-hourglass-half"></i> Menunggu Verifikasi</span>';
                 }

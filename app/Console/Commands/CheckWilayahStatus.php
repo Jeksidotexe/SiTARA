@@ -14,7 +14,7 @@ class CheckWilayahStatus extends Command
     /**
      * Signature command
      */
-    protected $signature = 'simantel:check-wilayah-status';
+    protected $signature = 'sitara:check-wilayah-status';
 
     /**
      * Deskripsi command

@@ -16,13 +16,13 @@
             <div class="card">
                 <div class="card-body p-3">
                     <div class="table-responsive p-0">
-                        <table class="table table-striped" id="table-laporan-pending">
+                        <table class="table table-striped" id="table-laporan-pending" style="width: 100%">
                             <thead>
-                                <th>No</th>
+                                <th width="5">No</th>
                                 <th>Tipe Laporan</th>
                                 <th>Nama Operator</th>
                                 <th>Tanggal Laporan</th>
-                                <th><i class="fa fa-cog"></i></th>
+                                <th width="15"><i class="fa fa-cog"></i></th>
                             </thead>
                         </table>
                     </div>
@@ -38,7 +38,8 @@
 
         $(function() {
             table = $('#table-laporan-pending').DataTable({
-                responsive: true,
+                responsive: false,
+                scrollX: true,
                 processing: true,
                 serverSide: true,
                 ajax: '{{ route('verifikasi.pending.data') }}',
@@ -54,7 +55,7 @@
                     },
                     {
                         data: 'operator_name',
-                        name: 'operator.nama'
+                        name: 'operator_name'
                     },
                     {
                         data: 'tanggal_laporan',

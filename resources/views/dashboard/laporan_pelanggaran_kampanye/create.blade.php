@@ -1,5 +1,4 @@
 @extends('layouts.master')
-
 @section('page', 'Tambah Laporan Harian Pelanggaran Kampanye')
 @section('title', 'Tambah Laporan Harian Pelanggaran Kampanye')
 
@@ -13,7 +12,6 @@
             display: block;
         }
 
-        /* Styling TinyMCE */
         .tox-tinymce {
             border: 1px solid #dad2d2;
             border-radius: 0.375rem;
@@ -24,13 +22,10 @@
             font-size: 0.875rem;
         }
 
-        /* SEMBUNYIKAN INPUT FILE ASLI */
         input[type="file"].custom-file-input {
             display: none;
         }
 
-
-        /* STYLING DAFTAR FILE YANG DIPILIH */
         .file-list-container {
             margin-top: 15px;
             border: 1px solid #d2d6da;
@@ -60,12 +55,10 @@
 
         .file-list-item .file-size {
             color: #6c757d;
-            /* text-muted */
             font-size: 0.85rem;
             margin-left: 10px;
         }
 
-        /* Container untuk thumbnail atau icon */
         .file-preview-thumbnail {
             width: 50px;
             height: 50px;
@@ -77,18 +70,14 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            /* Untuk memotong gambar agar pas */
         }
 
-        /* Style untuk thumbnail gambar */
         .file-preview-thumbnail img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            /* Membuat gambar mengisi container */
         }
 
-        /* Style untuk icon (jika bukan gambar) */
         .file-preview-thumbnail .file-icon {
             font-size: 1.5rem;
             color: #6c757d;
@@ -96,13 +85,11 @@
 
         .file-list-item .file-info {
             flex-grow: 1;
-            /* Membuat info file mengisi sisa ruang */
             margin-right: 10px;
         }
 
         .file-list-item .btn {
             flex-shrink: 0;
-            /* Mencegah tombol hapus mengecil */
         }
     </style>
 @endpush
@@ -115,7 +102,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Tambah Laporan Harian Pelanggaran Kampanye</h5>
                         <a href="{{ route('laporan_pelanggaran_kampanye.index') }}"
-                            class="btn btn-secondary bg-gradient-secondary btn-sm">
+                            class="btn btn-sm btn-secondary bg-gradient-secondary">
                             <i class="fa fa-arrow-left"></i> Kembali
                         </a>
                     </div>
@@ -183,15 +170,14 @@
 
                                 @if ($step['file'])
                                     <div class="mb-3">
-                                        {{-- PERUBAHAN LABEL --}}
                                         <label class="form-label">Silahkan Pilih dan Upload File</label>
                                         <div>
                                             <input class="custom-file-input" type="file" id="{{ $step['file'] }}"
                                                 name="{{ $step['file'] }}[]" multiple
                                                 onchange="addFilesToDataTransfer('{{ $step['file'] }}', 'file-list-{{ $key }}')"
-                                                {{-- PERUBAHAN ACCEPT --}} accept="image/*">
+                                                accept="image/*">
 
-                                            <label for="{{ $step['file'] }}" class="btn btn-sm bg-gradient-dark">
+                                            <label for="{{ $step['file'] }}" class="btn btn-sm btn-dark bg-gradient-dark">
                                                 <i class="fa fa-upload"></i> Pilih File
                                             </label>
                                         </div>
@@ -199,7 +185,6 @@
                                         <div class="file-list-container" id="file-list-{{ $key }}"
                                             style="display: none;">
                                         </div>
-                                        {{-- PERUBAHAN TEKS BANTUAN --}}
                                         <small class="text-muted mt-2 d-block">*Hanya menerima file gambar (JPG, JPEG, PNG).
                                             Maks. 2MB per
                                             file.</small>
@@ -242,7 +227,7 @@
                     <div id="previewFallback" style="display: none;">
                         <i class="fa fa-file-alt" style="font-size: 80px; color: #6c757d;"></i>
                         <p class="mt-3">Pratinjau tidak tersedia untuk tipe file ini.</p>
-                        <a href="" id="previewDownloadLink" class="btn btn-dark" target="_blank">
+                        <a href="" id="previewDownloadLink" class="btn btn-sm btn-dark bg-gradient-dark" target="_blank">
                             <i class="fa fa-download"></i> Download File
                         </a>
                     </div>
@@ -261,7 +246,6 @@
             }
         });
 
-        // PERUBAHAN: Menghapus parameter 'isPdf'
         function showPreview(filePath, isImage) {
             if (!previewModal) return;
 
@@ -270,7 +254,6 @@
             const fallbackEl = document.getElementById('previewFallback');
             const downloadLink = document.getElementById('previewDownloadLink');
 
-            // Hide all elements first
             imgEl.style.display = 'none';
             imgEl.src = '';
             frameEl.style.display = 'none';
@@ -281,7 +264,6 @@
                 imgEl.src = filePath;
                 imgEl.style.display = 'block';
             } else {
-                // Fallback untuk file lain (seharusnya tidak terjadi jika validasi benar)
                 downloadLink.href = filePath;
                 fallbackEl.style.display = 'block';
             }
@@ -336,13 +318,13 @@
 
                 const previewBtn = document.createElement('button');
                 previewBtn.type = 'button';
-                previewBtn.className = 'btn btn-dark bg-gradient-dark btn-sm me-1';
+                previewBtn.className = 'btn btn-sm btn-dark bg-gradient-dark me-1';
                 previewBtn.innerHTML = '<i class="fa fa-eye"></i>';
                 previewBtn.disabled = true;
 
                 const removeBtn = document.createElement('button');
                 removeBtn.type = 'button';
-                removeBtn.className = 'btn btn-danger btn-sm';
+                removeBtn.className = 'btn btn-sm btn-danger bg-gradient-danger';
                 removeBtn.innerHTML = '<i class="fa fa-trash"></i>';
 
                 removeBtn.onclick = function() {
@@ -350,9 +332,7 @@
                 };
 
                 const isImage = file.type.startsWith('image/');
-                // PERUBAHAN: isPdf DIHAPUS
 
-                // PERUBAHAN: Hanya logika 'isImage'
                 if (isImage) {
                     const reader = new FileReader();
                     reader.onload = function(e) {
@@ -361,12 +341,10 @@
                         thumbnailContainer.appendChild(img);
 
                         previewBtn.disabled = false;
-                        // PERUBAHAN: onclick disederhanakan
                         previewBtn.onclick = () => showPreview(e.target.result, true);
                     };
                     reader.readAsDataURL(file);
                 }
-                // PERUBAHAN: Blok 'else if (isPdf)' dan 'else' DIHAPUS
 
                 fileItem.appendChild(thumbnailContainer);
                 fileItem.appendChild(fileInfo);
@@ -379,59 +357,50 @@
             input.files = files;
         }
 
-        // --- FUNGSI UTAMA DENGAN VALIDASI TOAST ---
         function addFilesToDataTransfer(inputId, containerId) {
             const input = document.getElementById(inputId);
-            // Tentukan batas maksimal ukuran file (2MB)
-            const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB in bytes
+            const MAX_FILE_SIZE = 2 * 1024 * 1024;
 
             if (!fileUploads[inputId]) {
                 fileUploads[inputId] = new DataTransfer();
             }
 
             const newFiles = input.files ? Array.from(input.files) : [];
-            input.value = ''; // Kosongkan input file asli
+            input.value = '';
 
-            let rejectedFilesType = []; // Array untuk file dengan tipe salah
-            let rejectedFilesSize = []; // Array untuk file yang ukurannya terlalu besar
+            let rejectedFilesType = [];
+            let rejectedFilesSize = [];
 
             if (newFiles.length > 0) {
                 for (const file of newFiles) {
                     const isImage = file.type.startsWith('image/');
 
-                    // 1. Validasi Tipe
                     if (!isImage) {
                         rejectedFilesType.push(file.name);
-                        continue; // Lanjut ke file berikutnya
+                        continue;
                     }
 
-                    // 2. Validasi Ukuran (hanya jika lolos validasi tipe)
                     if (file.size > MAX_FILE_SIZE) {
                         rejectedFilesSize.push(`${file.name} (${formatBytes(file.size)})`);
-                        continue; // Lanjut ke file berikutnya
+                        continue;
                     }
 
-                    // 3. Jika lolos semua, tambahkan ke daftar
                     fileUploads[inputId].items.add(file);
                 }
             }
 
-            // --- PERUBAHAN: MENGGUNAKAN TOAST (TANPA LIST) ---
             if (rejectedFilesType.length > 0) {
-                // Gabungkan nama file dengan <br>
                 let message = 'File berikut ditolak (hanya gambar):<br>' + rejectedFilesType.join('<br>');
 
                 if (typeof showMaterialToast === 'function') {
                     showMaterialToast(message, 'danger', 'Tipe File Ditolak');
                 } else {
-                    // Fallback jika fungsi toast tidak ditemukan
                     alert('File berikut ditolak karena tipe filenya tidak valid (hanya gambar):\n\n- ' +
                         rejectedFilesType.join('\n- '));
                 }
             }
 
             if (rejectedFilesSize.length > 0) {
-                // Gabungkan nama file dengan <br>
                 let message = 'File berikut ditolak (melebihi 2MB):<br>' + rejectedFilesSize.join('<br>');
 
                 if (typeof showMaterialToast === 'function') {
@@ -441,9 +410,7 @@
                         '\n- '));
                 }
             }
-            // --- AKHIR PERUBAHAN ---
 
-            // Render ulang daftar file yang valid
             renderFileList(inputId, containerId);
         }
 
@@ -533,7 +500,6 @@
                     penutupContainer = penutupEditor.getContentAreaContainer();
                 }
 
-                // 3. Reset status error setiap kali submit
                 if (penutupError) penutupError.style.display = 'none';
                 if (penutupContainer) penutupContainer.style.border = '';
 

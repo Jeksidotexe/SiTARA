@@ -1,12 +1,6 @@
 @extends('layouts.master')
-
-@section('page')
-    Daftar Wilayah
-@endsection
-
-@section('title')
-    Daftar Wilayah
-@endsection
+@section('page', 'Daftar Wilayah')
+@section('title', 'Daftar Wilayah')
 
 @section('content')
     <div class="row">
@@ -21,21 +15,20 @@
         <div class="col-12 mb-md-0 mb-4">
             <div class="card">
                 <div class="card-header pb-0">
-                    <a href="{{ route('wilayah.create') }}" class="btn btn-dark glow-dark btn-sm">
+                    <a href="{{ route('wilayah.create') }}" class="btn btn-sm btn-dark bg-gradient-dark">
                         <i class="fa fa-plus"></i> Tambah Wilayah
                     </a>
                 </div>
-
                 <div class="card-body p-3">
                     <div class="table-responsive p-0">
-                        <table class="table table-striped" id="table-wilayah">
+                        <table class="table table-striped" id="table-wilayah" style="width: 100%">
                             <thead>
-                                <th width="5%">No</th>
+                                <th width="5">No</th>
                                 <th>Nama Wilayah</th>
                                 <th>Latitude</th>
                                 <th>Longitude</th>
                                 <th>Status</th>
-                                <th width="15%"><i class="fa fa-cog"></i></th>
+                                <th width="15"><i class="fa fa-cog"></i></th>
                             </thead>
                         </table>
                     </div>
@@ -53,7 +46,8 @@
 
         $(function() {
             table = $('#table-wilayah').DataTable({
-                responsive: true,
+                responsive: false,
+                scrollX: true,
                 processing: true,
                 serverSide: true,
                 ajax: '{{ route('wilayah.data') }}',
@@ -143,9 +137,7 @@
             });
         }
 
-        // [TAMBAHKAN BLOK INI UNTUK REALTIME]
         document.addEventListener('DOMContentLoaded', function() {
-            // Pastikan Echo sudah di-load dari master layout Anda
             if (typeof window.Echo !== 'undefined') {
                 console.log('[Reverb] Mendengarkan di channel publik: wilayah-updates');
 

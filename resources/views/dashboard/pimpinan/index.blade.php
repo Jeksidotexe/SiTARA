@@ -3,10 +3,22 @@
 @section('page', 'Home')
 
 @section('content')
-    <div class="row mb-4">
-        <div class="col-lg-12">
+    <div class="row mb-4 align-items-center">
+        <div class="col-lg-8 col-md-7 col-12 mb-3 mb-md-0">
             <h3 class="font-weight-bolder text-uppercase mb-1">Pimpinan {{ Auth::user()->wilayah->nama_wilayah }}</h3>
             <p class="text-muted text-sm">Pastikan Anda mengikuti tata cara yang benar dalam verfikasi laporan.</p>
+        </div>
+        <div class="col-lg-4 col-md-5 col-12 text-md-end text-start">
+            <div class="d-inline-block px-3 py-2 border-radius-lg">
+                <p class="text-sm text-muted mb-0 font-weight-bold text-end" id="realtime-date">
+                    Memuat tanggal...
+                </p>
+                <h4 class="font-weight-bolder mb-0 d-flex align-items-center justify-content-md-end text-dark">
+                    <i class="material-symbols-rounded me-2 text-gradient text-dark fs-4">schedule</i>
+                    <span id="realtime-clock" style="min-width: 110px;">00:00:00</span>
+                    <span class="text-xs font-weight-normal ms-1 text-muted">WIB</span>
+                </h4>
+            </div>
         </div>
     </div>
 
@@ -186,19 +198,21 @@
 @push('scripts')
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            @if (isset($labelsBulan) && isset($dataJumlah))
-                var ctx = document.getElementById("chart-laporan-pimpinan").getContext("2d");
+            const labels = @json($labelsBulan ?? []);
+            const data = @json($dataJumlah ?? []);
+            const ctxElement = document.getElementById("chart-laporan-pimpinan");
 
-                const darkBlueColor = 'rgba(58, 65, 111, 0.8)';
-                const lightBlueColor = 'rgba(58, 65, 111, 1)';
+            const currentMonthIndex = @json($currentMonthIndex);
 
-                var gradientFill = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
+            if (ctxElement && labels.length > 0) {
+                const ctx = ctxElement.getContext("2d");
 
-                gradientFill.addColorStop(0, darkBlueColor);
-                gradientFill.addColorStop(1, lightBlueColor);
+                const defaultColor = 'rgba(58, 65, 111, 0.6)';
+                const highlightColor = 'rgba(70, 78, 130, 0.9)';
 
-                var labels = @json($labelsBulan);
-                var data = @json($dataJumlah);
+                const backgroundColors = data.map((_, index) =>
+                    index === currentMonthIndex ? highlightColor : defaultColor
+                );
 
                 new Chart(ctx, {
                     type: "bar",
@@ -206,13 +220,13 @@
                         labels: labels,
                         datasets: [{
                             label: "Laporan Disetujui",
-                            tension: 0.4,
-                            borderWidth: 0,
-                            borderRadius: 8,
-                            borderSkipped: false,
-                            backgroundColor: gradientFill,
+                            backgroundColor: backgroundColors,
                             data: data,
+                            borderWidth: 0,
+                            borderRadius: 4,
+                            borderSkipped: false,
                             maxBarThickness: 40,
+                            tension: 0.4,
                         }, ],
                     },
                     options: {
@@ -223,6 +237,9 @@
                                 display: false,
                             },
                             tooltip: {
+                                backgroundColor: 'rgb(38, 38, 38, 0.9)',
+                                titleColor: '#fff',
+                                bodyColor: '#fff',
                                 callbacks: {
                                     label: function(context) {
                                         let label = context.dataset.label || '';
@@ -231,6 +248,9 @@
                                         }
                                         if (context.parsed.y !== null) {
                                             label += context.parsed.y + ' Laporan';
+                                        }
+                                        if (context.dataIndex === currentMonthIndex) {
+                                            label += ' (Saat Ini)';
                                         }
                                         return label;
                                     }
@@ -243,21 +263,21 @@
                         },
                         scales: {
                             y: {
+                                beginAtZero: true,
                                 grid: {
                                     drawBorder: false,
                                     display: true,
                                     drawOnChartArea: true,
                                     drawTicks: false,
                                     borderDash: [5, 5],
-                                    color: 'rgba(0, 0, 0, .08)'
+                                    color: 'rgba(0, 0, 0, .1)'
                                 },
                                 ticks: {
                                     display: true,
                                     padding: 10,
                                     color: '#6c757d',
                                     font: {
-                                        size: 14,
-                                        weight: 300,
+                                        size: 11,
                                         family: "Inter",
                                         style: 'normal',
                                         lineHeight: 2
@@ -278,21 +298,58 @@
                                 },
                                 ticks: {
                                     display: true,
-                                    color: '#6c757d',
-                                    padding: 20,
+                                    padding: 10,
+                                    color: function(context) {
+                                        return context.index === currentMonthIndex ? '#464E82' :
+                                            '#6c757d';
+                                    },
                                     font: {
-                                        size: 14,
-                                        weight: 300,
+                                        size: 11,
                                         family: "Inter",
                                         style: 'normal',
-                                        lineHeight: 2
-                                    },
+                                        lineHeight: 2,
+                                        weight: function(context) {
+                                            return context.index === currentMonthIndex ? 'bold' :
+                                                'normal';
+                                        },
+                                    }
                                 }
                             },
                         },
                     },
                 });
-            @endif
+            }
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cek apakah moment.js tersedia (sudah ada di master.blade.php)
+            if (typeof moment !== 'undefined') {
+                // Set locale ke Indonesia
+                moment.locale('id');
+
+                function updateTime() {
+                    const now = moment();
+
+                    // Update Jam (Format: 14:30:59)
+                    const timeString = now.format('HH:mm:ss');
+                    const clockElement = document.getElementById('realtime-clock');
+                    if (clockElement) clockElement.innerText = timeString;
+
+                    // Update Tanggal (Format: Senin, 25 November 2024)
+                    const dateString = now.format('dddd, D MMMM YYYY');
+                    const dateElement = document.getElementById('realtime-date');
+                    if (dateElement) dateElement.innerText = dateString;
+                }
+
+                // Jalankan fungsi update setiap 1 detik
+                setInterval(updateTime, 1000);
+
+                // Jalankan segera saat load agar tidak ada delay tampilan
+                updateTime();
+            } else {
+                console.error('Moment.js tidak ditemukan. Pastikan sudah di-load di master layout.');
+            }
         });
     </script>
 @endpush

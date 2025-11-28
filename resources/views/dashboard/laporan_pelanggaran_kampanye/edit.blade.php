@@ -1,5 +1,4 @@
 @extends('layouts.master')
-
 @section('page', 'Edit Laporan Harian Pelanggaran Kampanye')
 @section('title', 'Edit Laporan Harian Pelanggaran Kampanye')
 
@@ -33,7 +32,6 @@
             display: none;
         }
 
-        /* === CSS BARU DISALIN DARI CREATE.BLADE.PHP === */
         .file-list-container {
             margin-top: 15px;
             border: 1px solid #d2d6da;
@@ -44,7 +42,6 @@
 
         .file-list-item {
             display: flex;
-            /* justify-content: space-between; <- Dihapus agar tombol rapat ke kanan */
             align-items: center;
             padding: 5px 10px;
             border-bottom: 1px solid #e9ecef;
@@ -55,7 +52,6 @@
             border-bottom: none;
         }
 
-        /* Container for thumbnail or icon */
         .file-preview-thumbnail {
             width: 50px;
             height: 50px;
@@ -69,14 +65,12 @@
             overflow: hidden;
         }
 
-        /* Style for image thumbnail */
         .file-preview-thumbnail img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
 
-        /* Style for icon (if not image) */
         .file-preview-thumbnail .file-icon {
             font-size: 1.5rem;
             color: #6c757d;
@@ -84,7 +78,6 @@
 
         .file-list-item .file-info {
             flex-grow: 1;
-            /* Membuat info file mengisi sisa ruang */
             margin-right: 10px;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -99,10 +92,7 @@
 
         .file-list-item .btn {
             flex-shrink: 0;
-            /* Mencegah tombol mengecil */
         }
-
-        /* === AKHIR DARI CSS BARU === */
     </style>
 @endpush
 
@@ -114,7 +104,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Edit Laporan Harian Pelanggaran Kampanye</h5>
                         <a href="{{ route('laporan_pelanggaran_kampanye.index') }}"
-                            class="btn btn-secondary bg-gradient-secondary btn-sm">
+                            class="btn btn-sm btn-secondary bg-gradient-secondary">
                             <i class="fa fa-arrow-left"></i> Kembali
                         </a>
                     </div>
@@ -192,11 +182,7 @@
                                                             'jpg',
                                                             'jpeg',
                                                             'png',
-                                                            'gif',
-                                                            'bmp',
-                                                            'webp',
                                                         ]);
-                                                        // PERUBAHAN: Menghapus 'isPdf'
                                                     @endphp
 
                                                     <div class="file-list-item" data-path="{{ $filePath }}">
@@ -204,7 +190,6 @@
                                                             @if ($isImage)
                                                                 <img src="{{ $fullPath }}" alt="Preview">
                                                             @else
-                                                                {{-- Ikon fallback untuk file lama (mungkin PDF) --}}
                                                                 <i class="fa fa-file-alt file-icon"></i>
                                                             @endif
                                                         </div>
@@ -214,13 +199,12 @@
                                                         </span>
 
                                                         <button type="button"
-                                                            class="btn btn-dark bg-gradient-dark btn-sm me-1"
-                                                            {{-- PERUBAHAN: Menghapus parameter 'isPdf' --}}
+                                                            class="btn btn-sm btn-dark bg-gradient-dark me-1"
                                                             onclick="showPreview('{{ $fullPath }}', {{ $isImage ? 'true' : 'false' }})">
                                                             <i class="fa fa-eye"></i>
                                                         </button>
 
-                                                        <button type="button" class="btn btn-danger btn-sm"
+                                                        <button type="button" class="btn btn-sm btn-danger bg-gradient-danger"
                                                             onclick="markForDeletion(this, '{{ $fileKey }}', '{{ $filePath }}')">
                                                             <i class="fa fa-trash"></i>
                                                         </button>
@@ -232,15 +216,14 @@
 
 
                                     <div class="mb-3">
-                                        {{-- PERUBAHAN LABEL --}}
                                         <label class="form-label">Upload File Baru</label>
                                         <div>
                                             <input class="custom-file-input" type="file" id="{{ $fileKey }}"
                                                 name="{{ $fileKey }}[]" multiple
                                                 onchange="addFilesToDataTransfer('{{ $fileKey }}', 'file-list-{{ $key }}')"
-                                                {{-- PERUBAHAN: Mengubah 'accept' --}} accept="image/*">
+                                                accept="image/*">
 
-                                            <label for="{{ $fileKey }}" class="btn btn-sm bg-gradient-dark">
+                                            <label for="{{ $fileKey }}" class="btn btn-sm btn-dark bg-gradient-dark">
                                                 <i class="fa fa-upload"></i> Pilih File
                                             </label>
                                         </div>
@@ -249,7 +232,6 @@
                                             style="display: none;">
                                         </div>
                                         <small class="text-muted mt-2 d-block">
-                                            {{-- PERUBAHAN: Mengubah teks bantuan --}}
                                             *Hanya menerima file gambar (JPG, JPEG, PNG). Maks. 2MB per
                                             file.
                                         </small>
@@ -294,7 +276,7 @@
                     <div id="previewFallback" style="display: none;">
                         <i class="fa fa-file-alt" style="font-size: 80px; color: #6c757d;"></i>
                         <p class="mt-3">Pratinjau tidak tersedia untuk tipe file ini.</p>
-                        <a href="" id="previewDownloadLink" class="btn btn-dark" target="_blank">
+                        <a href="" id="previewDownloadLink" class="btn btn-sm btn-dark bg-gradient-dark" target="_blank">
                             <i class="fa fa-download"></i> Download File
                         </a>
                     </div>
@@ -315,7 +297,6 @@
             }
         });
 
-        // PERUBAHAN: Menghapus parameter 'isPdf'
         function showPreview(filePath, isImage) {
             if (!previewModal) return;
 
@@ -334,7 +315,6 @@
                 imgEl.src = filePath;
                 imgEl.style.display = 'block';
             } else {
-                // Ini untuk file lama yg mungkin bukan gambar (cth: PDF lama)
                 downloadLink.href = filePath;
                 fallbackEl.style.display = 'block';
             }
@@ -354,8 +334,8 @@
             item.style.opacity = '0.5';
             item.style.textDecoration = 'line-through';
             button.innerHTML = '<i class="fa fa-undo"></i>';
-            button.classList.remove('btn-danger');
-            button.classList.add('btn-warning');
+            button.classList.remove('btn btn-sm btn-danger bg-gradient-danger');
+            button.classList.add('btn btn-sm btn-warning bg-gradient-warning');
             button.onclick = function() {
                 unmarkForDeletion(button, hiddenInput);
             };
@@ -367,8 +347,8 @@
             item.style.opacity = '1';
             item.style.textDecoration = 'none';
             button.innerHTML = '<i class="fa fa-trash"></i>';
-            button.classList.remove('btn-warning');
-            button.classList.add('btn-danger');
+            button.classList.remove('btn btn-sm btn-warning bg-gradient-warning');
+            button.classList.add('btn btn-sm btn-danger bg-gradient-danger');
             const filePath = item.getAttribute('data-path');
             const fileKey = hiddenInput.name.match(/\[(.*?)\]/)[1];
             button.onclick = function() {
@@ -422,22 +402,20 @@
 
                 const previewBtn = document.createElement('button');
                 previewBtn.type = 'button';
-                previewBtn.className = 'btn btn-dark bg-gradient-dark btn-sm me-1';
+                previewBtn.className = 'btn btn-sm btn-dark bg-gradient-dark me-1';
                 previewBtn.innerHTML = '<i class="fa fa-eye"></i>';
                 previewBtn.disabled = true;
 
                 const removeBtn = document.createElement('button');
                 removeBtn.type = 'button';
-                removeBtn.className = 'btn btn-danger btn-sm';
+                removeBtn.className = 'btn btn-sm btn-danger bg-gradient-danger';
                 removeBtn.innerHTML = '<i class="fa fa-trash"></i>';
                 removeBtn.onclick = function() {
                     removeFile(inputId, containerId, i);
                 };
 
                 const isImage = file.type.startsWith('image/');
-                // PERUBAHAN: Menghapus 'isPdf'
 
-                // PERUBAHAN: Hanya menyisakan logika 'isImage'
                 if (isImage) {
                     const reader = new FileReader();
                     reader.onload = function(e) {
@@ -446,12 +424,10 @@
                         thumbnailContainer.appendChild(img);
 
                         previewBtn.disabled = false;
-                        // PERUBAHAN: Menghapus parameter 'isPdf'
                         previewBtn.onclick = () => showPreview(e.target.result, true);
                     };
                     reader.readAsDataURL(file);
                 }
-                // PERUBAHAN: Menghapus blok 'else if (isPdf)' dan 'else'
 
                 fileItem.appendChild(thumbnailContainer);
                 fileItem.appendChild(fileInfo);
@@ -463,57 +439,49 @@
             input.files = files;
         }
 
-        // --- FUNGSI UTAMA DENGAN VALIDASI TOAST ---
         function addFilesToDataTransfer(inputId, containerId) {
             const input = document.getElementById(inputId);
-            const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB in bytes
+            const MAX_FILE_SIZE = 2 * 1024 * 1024;
 
             if (!fileUploads[inputId]) {
                 fileUploads[inputId] = new DataTransfer();
             }
             const newFiles = input.files ? Array.from(input.files) : [];
-            input.value = ''; // Kosongkan input file asli
+            input.value = '';
 
-            let rejectedFilesType = []; // Array untuk file dengan tipe salah
-            let rejectedFilesSize = []; // Array untuk file yang ukurannya terlalu besar
+            let rejectedFilesType = [];
+            let rejectedFilesSize = [];
 
             if (newFiles.length > 0) {
                 for (const file of newFiles) {
                     const isImage = file.type.startsWith('image/');
 
-                    // 1. Validasi Tipe
                     if (!isImage) {
                         rejectedFilesType.push(file.name);
-                        continue; // Lanjut ke file berikutnya
+                        continue;
                     }
 
-                    // 2. Validasi Ukuran (hanya jika lolos validasi tipe)
                     if (file.size > MAX_FILE_SIZE) {
                         rejectedFilesSize.push(`${file.name} (${formatBytes(file.size)})`);
-                        continue; // Lanjut ke file berikutnya
+                        continue;
                     }
 
-                    // 3. Jika lolos semua, tambahkan ke daftar
                     fileUploads[inputId].items.add(file);
                 }
             }
 
-            // --- PERUBAHAN: MENGGUNAKAN TOAST (TANPA LIST) ---
             if (rejectedFilesType.length > 0) {
-                // Gabungkan nama file dengan <br>
                 let message = 'File berikut ditolak (hanya gambar):<br>' + rejectedFilesType.join('<br>');
 
                 if (typeof showMaterialToast === 'function') {
                     showMaterialToast(message, 'danger', 'Tipe File Ditolak');
                 } else {
-                    // Fallback jika fungsi toast tidak ditemukan
                     alert('File berikut ditolak karena tipe filenya tidak valid (hanya gambar):\n\n- ' +
                         rejectedFilesType.join('\n- '));
                 }
             }
 
             if (rejectedFilesSize.length > 0) {
-                // Gabungkan nama file dengan <br>
                 let message = 'File berikut ditolak (melebihi 2MB):<br>' + rejectedFilesSize.join('<br>');
 
                 if (typeof showMaterialToast === 'function') {
@@ -523,7 +491,6 @@
                         '\n- '));
                 }
             }
-            // --- AKHIR PERUBAHAN ---
 
             renderFileList(inputId, containerId);
         }

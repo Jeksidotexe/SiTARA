@@ -3,7 +3,6 @@
 @section('page', 'Laporan Bulanan - ' . $wilayah->nama_wilayah . ' - ' . $monthName . ' ' . $year)
 @section('title', 'Daftar Laporan')
 
-{{-- Include CSS DataTables jika belum ada di master layout --}}
 @push('styles')
     <link rel="stylesheet" href="{{ asset('master/assets/css/dataTables.bootstrap5.min.css') }}">
     <link rel="stylesheet" href="{{ asset('master/assets/css/custom-datatables.css') }}">
@@ -20,7 +19,6 @@
             </div>
         </div>
 
-        {{-- [PERBAIKAN] Tambahkan Filter Tipe Laporan & Tombol Kembali --}}
         <div class="col-lg-6 col-md-12 d-flex justify-content-lg-end align-items-center gap-2 flex-wrap">
             <div class="me-lg-2" style="min-width: 300px;">
                 <label for="report-type-filter" class="form-label font-weight-bold ms-0 mb-1">Filter Tipe Laporan</label>
@@ -39,7 +37,6 @@
                 <i class="fas fa-arrow-left me-1"></i> Kembali
             </a>
         </div>
-        {{-- [AKHIR PERBAIKAN] --}}
     </div>
 
     <div class="row mb-4">
@@ -49,7 +46,6 @@
                     <div class="table-responsive">
                         <table class="table table-striped" id="table-laporan-bulanan" style="width:100%">
                             <thead>
-                                {{-- [PERBAIKAN] Kembalikan header tabel ke versi asli --}}
                                 <tr>
                                     <th>Tanggal</th>
                                     <th>Pemda</th>
@@ -60,11 +56,10 @@
                                     <th>Ekonomi</th>
                                     <th>Sosbud</th>
                                     <th>Hankam</th>
-                                    <th width="10%"><i class="fa fa-cog"></i></th>
+                                    <th><i class="fa fa-cog"></i></th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {{-- DataTables akan mengisi ini --}}
                             </tbody>
                         </table>
                     </div>
@@ -75,38 +70,27 @@
 @endsection
 
 @push('scripts')
-    {{-- Include JS DataTables jika belum ada di master layout --}}
-    <script src="{{ asset('master/assets/js/plugins/dataTables.min.js') }}"></script>
-    <script src="{{ asset('master/assets/js/plugins/dataTables.bootstrap5.min.js') }}"></script>
-    <script src="{{ asset('master/assets/js/plugins/select2.min.js') }}"></script>
-
     <script>
         let table;
 
         $(function() {
-            // Inisialisasi Select2 untuk filter
             $('#report-type-filter').select2({
                 theme: 'bootstrap-5',
-                // minimumResultsForSearch: Infinity
             });
 
             table = $('#table-laporan-bulanan').DataTable({
                 responsive: true,
+                scrollX: true,
                 processing: true,
                 serverSide: true,
                 autoWidth: false,
-
-                // [PERBAIKAN] Tambahkan objek ajax dengan 'data'
                 ajax: {
                     url: '{{ route('laporan-bulanan.data', ['wilayah' => $wilayah->id_wilayah, 'month' => $month]) }}?year={{ $year }}',
                     data: function(d) {
-                        // Kirim nilai filter dropdown ke controller
                         d.report_type = $('#report-type-filter').val();
                     }
                 },
-                // [AKHIR PERBAIKAN]
 
-                // [PERBAIKAN] Kembalikan definisi kolom ke versi asli
                 columns: [{
                         data: 'tanggal_laporan',
                         name: 'tanggal_laporan'
@@ -159,7 +143,6 @@
                         className: 'text-center'
                     },
                 ],
-                // [AKHIR PERBAIKAN]
 
                 language: {
                     search: "Cari:",
@@ -171,9 +154,8 @@
                 }
             });
 
-            // [TAMBAHKAN] Event listener untuk filter dropdown
             $('#report-type-filter').on('change', function() {
-                table.ajax.reload(); // Muat ulang data tabel saat filter diubah
+                table.ajax.reload();
             });
         });
     </script>
