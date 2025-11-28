@@ -75,6 +75,38 @@
                     margin-bottom: 1rem;
                     font-size: 0.875rem;
                 }
+
+                #materialToast {
+                    overflow: hidden;
+                    position: relative;
+                    border-radius: 0.75rem;
+                    border: none;
+                }
+
+                @keyframes toastProgress {
+                    from {
+                        width: 100%;
+                    }
+
+                    to {
+                        width: 0%;
+                    }
+                }
+
+                .toast-progress-bar {
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    height: 5px;
+                    width: 100%;
+                    z-index: 10;
+                }
+
+                .toast-progress-running {
+                    animation-name: toastProgress;
+                    animation-timing-function: linear;
+                    animation-fill-mode: forwards;
+                }
             </style>
         @endpush
         @stack('styles')
@@ -86,15 +118,19 @@
             @if (Auth::user()->role == 'pimpinan') dashboard-pimpinan @endif
         @endif">
         <div class="position-fixed end-3" style="top: 4.5rem; z-index: 1090; max-width: 350px;">
-            <div id="materialToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
+            <div id="materialToast" class="toast hide shadow-lg" role="alert" aria-live="assertive"
+                aria-atomic="true">
+                <div class="toast-header border-0">
                     <span class="material-symbols-rounded me-2" id="toastIcon"></span>
                     <strong class="me-auto" id="toastTitle"></strong>
                     <small id="toastTime"></small>
-                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                    <button type="button" class="btn-close text-dark" data-bs-dismiss="toast" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
-                <div class="toast-body" id="toastBody">
+                <div class="toast-body bg-white" id="toastBody" style="padding-bottom: 1.5rem;">
                 </div>
+                <div id="toastProgressBar" class="toast-progress-bar" role="progressbar"></div>
             </div>
         </div>
         <!-- Sidebar -->
@@ -146,8 +182,8 @@
                                                 <span id="kop-surat-text" class="preview-text">Tidak ada gambar</span>
                                             </div>
 
-                                            <input class="form-control" type="file" name="kop_surat" id="kop_surat_input"
-                                                accept="image/*"
+                                            <input class="form-control" type="file" name="kop_surat"
+                                                id="kop_surat_input" accept="image/*"
                                                 onchange="previewImage(this, 'kop-surat-preview', 'kop-surat-text')"
                                                 style="display: none;">
 
@@ -184,7 +220,8 @@
                             <form id="formPengaturanTtd" enctype="multipart/form-data">
                                 @csrf
                                 <div class="modal-body">
-                                    <div id="ttd-error-container" class="alert alert-danger alert-container" role="alert">
+                                    <div id="ttd-error-container" class="alert alert-danger alert-container"
+                                        role="alert">
                                     </div>
                                     <p class="text-sm">Anda mengelola pengaturan untuk wilayah:
                                         <strong id="nama-wilayah-modal-ttd">Memuat...</strong>
@@ -267,8 +304,8 @@
                                     <button type="button" class="btn btn-sm bg-gradient-secondary"
                                         id="btnAbaikanTindakLanjut"><i class="fas fa-times me-1"></i>Abaikan</button>
 
-                                    <button type="submit" id="btnSubmitTindakLanjut" class="btn btn-sm bg-gradient-dark"><i
-                                            class="fa fa-save me-1"></i>
+                                    <button type="submit" id="btnSubmitTindakLanjut"
+                                        class="btn btn-sm bg-gradient-dark"><i class="fa fa-save me-1"></i>
                                         Simpan Perubahan
                                     </button>
                                 </div>
@@ -582,63 +619,91 @@
                 addToggleListener(togglePassword, password);
                 addToggleListener(togglePasswordConfirmation, passwordConfirmation);
             });
+
             const toastEl = document.getElementById('materialToast');
             const toastTitle = document.getElementById('toastTitle');
             const toastBody = document.getElementById('toastBody');
             const toastIcon = document.getElementById('toastIcon');
             const toastTime = document.getElementById('toastTime');
+            const toastProgressBar = document.getElementById('toastProgressBar');
 
             let materialToast;
+            const toastDelay = 5000;
+
             if (toastEl) {
                 materialToast = new bootstrap.Toast(toastEl, {
-                    delay: 5000
+                    delay: toastDelay,
+                    autohide: true
+                });
+
+                toastEl.addEventListener('hidden.bs.toast', function() {
+                    toastProgressBar.style.width = '100%';
+                    toastProgressBar.classList.remove('toast-progress-running');
                 });
             }
 
             function showMaterialToast(message, type, headerTitle, headerTime = 'Baru saja', iconClass) {
                 if (!materialToast) return;
 
-                toastIcon.classList.remove('text-success', 'text-danger', 'text-warning', 'text-info');
-                toastTitle.classList.remove('text-success', 'text-danger', 'text-warning', 'text-info');
+                const classesToRemove = ['text-success', 'text-danger', 'text-warning', 'text-info', 'bg-gradient-success',
+                    'bg-gradient-danger', 'bg-gradient-warning', 'bg-gradient-info'
+                ];
+                toastIcon.classList.remove(...classesToRemove);
+                toastTitle.classList.remove(...classesToRemove);
+                toastProgressBar.classList.remove(...classesToRemove);
 
                 let iconColorClass = 'text-info';
+                let progressBgClass = 'bg-gradient-info';
                 let finalHeaderTitle = headerTitle;
                 let finalIconClass = iconClass;
 
                 switch (type) {
                     case 'success':
                         iconColorClass = 'text-success';
+                        progressBgClass = 'bg-gradient-success';
                         if (!finalIconClass) finalIconClass = 'check_circle';
                         if (!finalHeaderTitle) finalHeaderTitle = 'Berhasil';
                         break;
                     case 'danger':
                         iconColorClass = 'text-danger';
+                        progressBgClass = 'bg-gradient-danger';
                         if (!finalIconClass) finalIconClass = 'error';
                         if (!finalHeaderTitle) finalHeaderTitle = 'Error';
                         break;
                     case 'warning':
                         iconColorClass = 'text-warning';
+                        progressBgClass = 'bg-gradient-warning';
                         if (!finalIconClass) finalIconClass = 'warning';
                         if (!finalHeaderTitle) finalHeaderTitle = 'Peringatan';
                         break;
                     case 'info':
                     default:
                         iconColorClass = 'text-info';
+                        progressBgClass = 'bg-gradient-info';
                         if (!finalIconClass) finalIconClass = 'info';
                         if (!finalHeaderTitle) finalHeaderTitle = 'Informasi';
                         break;
                 }
 
                 toastIcon.classList.add(iconColorClass);
-
                 if (type === 'danger') {
                     toastTitle.classList.add(iconColorClass);
                 }
+
+                toastProgressBar.classList.add(progressBgClass);
 
                 toastIcon.innerText = finalIconClass;
                 toastTitle.innerText = finalHeaderTitle;
                 toastTime.innerText = headerTime;
                 toastBody.innerHTML = message;
+
+                toastProgressBar.classList.remove('toast-progress-running');
+
+                void toastProgressBar.offsetWidth;
+
+                toastProgressBar.style.animationDuration = (toastDelay / 1000) + 's';
+
+                toastProgressBar.classList.add('toast-progress-running');
 
                 materialToast.show();
             }
