@@ -3,19 +3,20 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
+use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
+use App\Events\LaporanStatusUpdated;
 use App\Models\LaporanSituasiDaerah;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\NotifikasiUntukPimpinan;
-use App\Events\LaporanStatusUpdated;
 
 class LaporanSituasiDaerahController extends Controller
 {
@@ -121,6 +122,45 @@ class LaporanSituasiDaerahController extends Controller
         $rules['deleted_files.*.*'] = 'string';
 
         return ['rules' => $rules, 'messages' => $messages];
+    }
+
+    public function previewPdf(string $id)
+    {
+        $laporan = LaporanSituasiDaerah::with(['operator.wilayah'])->findOrFail($id);
+
+        $wilayah = $laporan->operator->wilayah ?? null;
+        if (!$wilayah) {
+            return redirect()->back()->with('error', 'Data wilayah tidak ditemukan pada operator ini.');
+        }
+
+        $reports = collect([$laporan]);
+        $filters = [
+            'tipe_laporan' => 'Situasi Daerah',
+            'tanggal'      => Carbon::parse($laporan->tanggal_laporan)->isoFormat('D MMMM YYYY'),
+            'bulan'        => null,
+            'tahun'        => null,
+        ];
+        $sectionKeys = $this->fileFields;
+        $sectionTitles = $this->fieldTitles;
+
+        $fileFields = $this->fileFields;
+        $fieldTitles = $this->fieldTitles;
+
+        $pdf = Pdf::loadView('dashboard.laporan_situasi_daerah.preview_pdf', compact(
+            'laporan',
+            'reports',
+            'wilayah',
+            'filters',
+            'sectionKeys',
+            'sectionTitles',
+            'fileFields',
+            'fieldTitles'
+        ));
+
+        $pdf->setPaper('A4', 'portrait');
+
+        $fileName = 'Laporan_Situasi_Daerah_' . Carbon::parse($laporan->tanggal_laporan)->format('d_m_Y') . '.pdf';
+        return $pdf->stream($fileName);
     }
 
 
@@ -317,14 +357,8 @@ class LaporanSituasiDaerahController extends Controller
         $laporan = $laporan_situasi_daerah;
         $laporan->loadMissing('operator');
 
-        // Kirim properti private ke view untuk me-render judul dan loop
-        $fieldTitles = $this->fieldTitles;
-        $fileFields = $this->fileFields; // ['a', 'b', 'c', ...]
-
         return view('dashboard.laporan_situasi_daerah.show', compact(
             'laporan',
-            'fieldTitles',
-            'fileFields'
         ));
     }
 

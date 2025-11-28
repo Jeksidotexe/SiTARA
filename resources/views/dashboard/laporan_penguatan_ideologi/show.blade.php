@@ -2,7 +2,6 @@
 @section('page', 'Detail Laporan Penguatan Ideologi Pancasila dan Karakter')
 @section('title', 'Detail Laporan Penguatan Ideologi Pancasila dan Karakter')
 
-
 @push('styles')
     <style>
         .section-card {
@@ -284,12 +283,12 @@
                         <div class="card-body p-3">
                             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                                 <div>
-                                    <h5 class="font-weight-bolder mb-0">Detail Laporan Penguatan Ideologi</h5>
+                                    <h5 class="font-weight-bolder mb-0">Detail Laporan Penguatan Ideologi Pancasila dan Karakter</h5>
                                 </div>
                                 @php
                                     $from = request('from');
                                     $userRole = Auth::user()->role;
-                                    $backUrl = route('dashboard');
+                                    $backUrl = route('laporan_penguatan_ideologi.index');
 
                                     if ($from == 'pending') {
                                         $backUrl = route('verifikasi.pending');
@@ -404,7 +403,8 @@
                                                 @php
                                                     $wilayah = $laporan->operator->wilayah ?? null;
                                                 @endphp
-                                                <button type="button" class="btn btn-sm btn-success bg-gradient-success w-100 mb-0"
+                                                <button type="button"
+                                                    class="btn btn-sm btn-success bg-gradient-success w-100 mb-0"
                                                     id="btn-approve-sweetalert"
                                                     data-wilayah-nama="{{ $wilayah->nama_wilayah ?? 'Wilayah Tidak Ditemukan' }}">
                                                     <i class="fas fa-check-circle me-2"></i> Setujui
@@ -424,7 +424,8 @@
                                                 Mengembalikan laporan untuk diperbaiki oleh operator
                                             </p>
                                             <div class="info-card-value">
-                                                <button type="button" class="btn btn-sm btn-warning bg-gradient-warning w-100 mb-0"
+                                                <button type="button"
+                                                    class="btn btn-sm btn-warning bg-gradient-warning w-100 mb-0"
                                                     data-bs-toggle="modal" data-bs-target="#revisionModal">
                                                     <i class="fas fa-edit me-2"></i> Minta Revisi
                                                 </button>
@@ -444,24 +445,20 @@
                                                     <i class="fas fa-sticky-note me-2"></i>
                                                     Catatan Revisi
                                                 </h6>
-                                                <a href="{{ route('laporan_penguatan_ideologi.edit', ['laporan_penguatan_ideologi' => $laporan->id_laporan]) }}"
-                                                    class="btn btn-sm btn-dark bg-gradient-dark mb-0">
-                                                    <i class="fas fa-edit me-1"></i> Perbaiki Laporan Ini
-                                                </a>
                                             </div>
-                                            <hr class="dark horizontal my-2">
                                             <p class="mb-0 text-sm text-dark">
                                                 {!! nl2br(e($laporan->catatan)) !!}</p>
                                         </div>
                                     </div>
                                 </div>
                             @endif
+
                         </div>
                     @endif
 
                     @if (Auth::user()->role == 'pimpinan' && $laporan->isPending())
                         <form id="approve-form"
-                            action="{{ route('verifikasi.approve', ['reportType' => 'laporan-penguatan-ideologi', 'id' => $laporan->id_laporan]) }}"
+                            action="{{ route('verifikasi.approve', ['reportType' => 'laporan-situasi-daerah', 'id' => $laporan->id_laporan]) }}"
                             method="POST" style="display: none;">
                             @csrf
                             <input type="hidden" name="catatan" value="">
@@ -473,7 +470,7 @@
                             <div class="modal-dialog modal-dialog-centered">
                                 <div class="modal-content">
                                     <form id="revision-form"
-                                        action="{{ route('verifikasi.requestRevision', ['reportType' => 'laporan-penguatan-ideologi', 'id' => $laporan->id_laporan]) }}"
+                                        action="{{ route('verifikasi.requestRevision', ['reportType' => 'laporan-situasi-daerah', 'id' => $laporan->id_laporan]) }}"
                                         method="POST">
                                         @csrf
                                         <div class="modal-header">
@@ -510,7 +507,7 @@
                     @endif
 
                     @if ($laporan->pimpinan && !(Auth::user()->role == 'operator' && $laporan->needsRevision()))
-                        <div class="row mt-5">
+                        <div class="row mt-4">
                             <div class="col-12 mb-3">
                                 <h6 class="text-uppercase text-body text-xs font-weight-bolder mb-0">
                                     <i class="fas fa-clipboard-check me-2"></i>Informasi Verifikasi
@@ -550,7 +547,7 @@
                                         @if ($laporan->needsRevision())
                                             @if (Auth::user()->role != 'operator')
                                                 <div class="card-body p-3"
-                                                    style="background: linear-gradient(195deg, #FFF3E0 0%, #FFE0B2 100%); border-left: 4px solid #fb8c00;">
+                                                    style="background: linear-gradient(195deg, #FFF3E0 0%, #FFE0B2 100%); border-left: 4px solid #fb8c00; border-radius:0.75rem;">
                                                     <h6 class="font-weight-bolder mb-2 text-warning">
                                                         <i class="fas fa-sticky-note me-2"></i>
                                                         Catatan Revisi
@@ -574,155 +571,49 @@
                             @endif
                         </div>
                     @endif
-
                     <div class="row mt-4">
                         <div class="col-12">
-                            <div class="card">
+                            <div class="card bg-gray-100">
                                 <div class="card-header pb-0">
-                                    <div class="content-header">
-                                        <h4>Deskripsi</h4>
-                                    </div>
-                                </div>
-                                <div class="card-body">
-                                    <div class="report-content-wrapper">
-                                        {!! $laporan->deskripsi !!}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row mt-4">
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-header pb-0">
-                                    <div class="content-header">
-                                        <h4>II. Laporan Permasalahan Strategis</h4>
-                                    </div>
-                                </div>
-                                <div class="card-body">
-                                    @foreach ($fileFields as $index => $fieldKey)
-                                        @php
-                                            $title = $fieldTitles[$fieldKey] ?? "Bagian $fieldKey";
-                                            $narasiField = "narasi_$fieldKey";
-                                            $fileField = "file_$fieldKey";
-                                            $narasiContent = $laporan->$narasiField;
-                                            $files = $laporan->$fileField ?? [];
-                                        @endphp
-
-                                        <div class="mb-4">
-                                            <h5 class="font-weight-bolder mb-3">
-                                                {{ $title }}
-                                            </h5>
-
-                                            @if (!empty(strip_tags($narasiContent)))
-                                                <div class="report-content-wrapper mb-3">
-                                                    {!! $narasiContent !!}
-                                                </div>
-                                            @else
-                                                <div class="empty-state-material">
-                                                    <i class="fas fa-file-alt"></i>
-                                                    <p>Tidak ada narasi untuk bagian ini</p>
-                                                </div>
-                                            @endif
-
-                                            @if (!empty($files) && is_array($files))
-                                                <label class="form-label text-dark font-weight-bold">
-                                                    <i class="fas fa-paperclip me-2"></i>File Lampiran
-                                                </label>
-                                                <div class="file-list-wrapper">
-                                                    @foreach ($files as $filePath)
-                                                        @php
-                                                            $fullPath = asset($filePath);
-                                                            $fileName = basename($filePath);
-                                                            $fileExt = strtolower(
-                                                                pathinfo($fileName, PATHINFO_EXTENSION),
-                                                            );
-                                                            $isImage = in_array($fileExt, [
-                                                                'jpg',
-                                                                'jpeg',
-                                                                'png',
-                                                            ]);
-                                                        @endphp
-
-                                                        <div class="file-item-material">
-                                                            <div class="file-thumbnail-material">
-                                                                @if ($isImage)
-                                                                    <img src="{{ $fullPath }}" alt="Preview">
-                                                                @else
-                                                                    <i class="fas fa-file-alt"></i>
-                                                                @endif
-                                                            </div>
-                                                            <div class="file-info-material">
-                                                                <div class="file-name-material">{{ $fileName }}</div>
-                                                            </div>
-                                                            <button type="button"
-                                                                class="btn btn-sm btn-dark bg-gradient-dark mb-0"
-                                                                onclick="showPreview('{{ $fullPath }}', {{ $isImage ? 'true' : 'false' }})">
-                                                                <i class="fas fa-eye me-1"></i> Lihat
-                                                            </button>
-                                                        </div>
-                                                    @endforeach
-                                                </div>
-                                            @else
-                                                <label class="form-label text-dark font-weight-bold">
-                                                    <i class="fas fa-paperclip me-2"></i>File Lampiran
-                                                </label>
-                                                <div class="empty-state-material">
-                                                    <i class="fas fa-folder-open"></i>
-                                                    <p>Tidak ada file lampiran</p>
-                                                </div>
-                                            @endif
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="content-header mb-0">
+                                            <h4><i class="fas fa-file-pdf me-2 text-dark"></i>Pratinjau Laporan</h4>
                                         </div>
-
-                                        @if (!$loop->last)
-                                            <div class="section-divider-material"></div>
+                                        @if (Auth::user()->role == 'operator' && $laporan->needsRevision())
+                                            <a href="{{ route('laporan_penguatan_ideologi.edit', ['laporan_penguatan_ideologi' => $laporan->id_laporan]) }}"
+                                                class="btn btn-sm btn-dark bg-gradient-dark">
+                                                <i class="fas fa-edit me-2"></i> Perbaiki Laporan Ini
+                                            </a>
                                         @endif
-                                    @endforeach
+                                    </div>
+                                </div>
+                                <div class="card-body p-3">
+                                    <div id="pdf-preview-container"
+                                        style="width: 100%; height: 800px; border-radius: 0.75rem; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                                        <div id="pdf-loading"
+                                            style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: white;">
+                                            <div class="spinner-border text-light mb-2" role="status"></div>
+                                            <p>Memuat Dokumen...</p>
+                                        </div>
+                                        <div id="pdf-error"
+                                            style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #ff6b6b;">
+                                            <i class="fas fa-exclamation-circle fa-3x mb-3"></i>
+                                            <h5>Gagal Memuat Dokumen</h5>
+                                            <p class="text-sm text-light opacity-8">Terjadi kesalahan saat mengambil data
+                                                PDF.</p>
+                                            <button onclick="loadPdf()" class="btn btn-sm btn-outline-white mt-2">
+                                                <i class="fas fa-sync-alt me-1"></i> Coba Lagi
+                                            </button>
+                                        </div>
+                                        <iframe id="pdf-iframe" width="100%" height="100%"
+                                            style="border: none; opacity: 0; transition: opacity 0.3s ease;"
+                                            allowfullscreen>
+                                            Browser Anda tidak mendukung preview PDF.
+                                        </iframe>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="row mt-4">
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-header pb-0">
-                                    <div class="content-header">
-                                        <h4>III. Penutup</h4>
-                                    </div>
-                                </div>
-                                <div class="card-body">
-                                    <div class="report-content-wrapper">
-                                        {!! $laporan->penutup !!}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="previewModalLabel">Pratinjau File</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body text-center p-4">
-                    <img src="" id="previewImage" class="img-fluid" alt="Preview"
-                        style="display: none; max-height: 75vh; border-radius: 0.75rem;">
-                    <iframe src="" id="previewFrame"
-                        style="width: 100%; height: 75vh; border: none; display: none; border-radius: 0.75rem;"></iframe>
-                    <div id="previewFallback" style="display: none;">
-                        <i class="fas fa-file-alt" style="font-size: 80px; color: #67748e;"></i>
-                        <p class="mt-3 text-secondary">Pratinjau tidak tersedia untuk tipe file ini.</p>
-                        <a href="" id="previewDownloadLink" class="btn btn-sm btn-dark bg-gradient-dark" target="_blank">
-                            <i class="fas fa-download me-2"></i> Download File
-                        </a>
                     </div>
                 </div>
             </div>
@@ -732,48 +623,6 @@
 
 @push('scripts')
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <script>
-        let previewModal = null;
-        document.addEventListener('DOMContentLoaded', function() {
-            if (document.getElementById('previewModal')) {
-                previewModal = new bootstrap.Modal(document.getElementById('previewModal'));
-
-                document.getElementById('previewModal').addEventListener('hidden.bs.modal', function() {
-                    document.getElementById('previewFrame').src = 'about:blank';
-                    document.getElementById('previewImage').src = '';
-                });
-            }
-        });
-
-        function showPreview(filePath, isImage) {
-            if (!previewModal) return;
-
-            const imgEl = document.getElementById('previewImage');
-            const frameEl = document.getElementById('previewFrame');
-            const fallbackEl = document.getElementById('previewFallback');
-            const downloadLink = document.getElementById('previewDownloadLink');
-            const modalLabel = document.getElementById('previewModalLabel');
-
-            imgEl.style.display = 'none';
-            imgEl.src = '';
-            frameEl.style.display = 'none';
-            frameEl.src = 'about:blank';
-            fallbackEl.style.display = 'none';
-
-            if (isImage) {
-                imgEl.src = filePath;
-                imgEl.style.display = 'block';
-                modalLabel.innerText = 'Pratinjau Gambar';
-            } else {
-                downloadLink.href = filePath;
-                fallbackEl.style.display = 'block';
-                modalLabel.innerText = 'Download File';
-            }
-
-            previewModal.show();
-        }
-    </script>
 
     <script>
         function initializeLaporanScripts() {
@@ -808,7 +657,7 @@
                         showCancelButton: true,
                         confirmButtonText: '<i class="fas fa-check-circle"></i> Ya, Setujui & Atur Status',
                         cancelButtonText: '<i class="fas fa-times"></i> Batal',
-                        confirmButtonColor: '#66BB6A',
+                        confirmButtonColor: '#262626',
                         cancelButtonColor: '#67748e',
                         reverseButtons: true,
                         customClass: {
@@ -881,7 +730,7 @@
                         showCancelButton: true,
                         confirmButtonText: '<i class="fas fa-paper-plane me-1"></i> Ya, Kirim!',
                         cancelButtonText: '<i class="fas fa-times me-1"></i> Batal',
-                        confirmButtonColor: '#FFA726',
+                        confirmButtonColor: '#262626',
                         cancelButtonColor: '#67748e',
                         reverseButtons: true,
                         customClass: {
@@ -928,7 +777,6 @@
                 const thisLaporanId = {{ $laporan->id_laporan }};
                 const contentWrapperId = 'laporan-content-wrapper';
                 console.log(`[Reverb] Mendengarkan di channel 'laporan-updates' untuk ID: ${thisLaporanId}`);
-
                 window.Echo.channel('laporan-updates')
                     .listen('.LaporanUpdated', (e) => {
                         console.log('[Reverb] Menerima event:', e);
@@ -955,7 +803,6 @@
                                 .then(html => {
                                     const parser = new DOMParser();
                                     const newDoc = parser.parseFromString(html, 'text/html');
-
                                     const newContent = newDoc.getElementById(contentWrapperId);
                                     const oldContent = document.getElementById(contentWrapperId);
 
@@ -986,5 +833,53 @@
                 console.error('Laravel Echo not initialized. Pastikan master layout memuatnya.');
             }
         });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPdf();
+        });
+
+        function loadPdf() {
+            const iframe = document.getElementById('pdf-iframe');
+            const loading = document.getElementById('pdf-loading');
+            const errorDiv = document.getElementById('pdf-error');
+            const url = "{{ route('laporan_penguatan_ideologi.previewPdf', $laporan->id_laporan) }}";
+
+            iframe.style.opacity = '0';
+            loading.style.display = 'block';
+            errorDiv.style.display = 'none';
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    const blobUrl = URL.createObjectURL(blob);
+
+                    iframe.src = blobUrl + "#toolbar=1&navpanes=1&scrollbar=1&view=100";
+
+                    iframe.onload = function() {
+                        loading.style.display = 'none';
+                        iframe.style.opacity = '1';
+
+                        if (typeof showMaterialToast === 'function') {
+                            showMaterialToast('Dokumen PDF berhasil dimuat.', 'success', 'Pratinjau');
+                        }
+                    };
+                })
+                .catch(error => {
+                    console.error('Error loading PDF:', error);
+                    loading.style.display = 'none';
+                    errorDiv.style.display = 'block';
+
+                    if (typeof showMaterialToast === 'function') {
+                        showMaterialToast('Gagal menampilkan dokumen PDF.', 'danger', 'Error');
+                    }
+                });
+        }
     </script>
 @endpush

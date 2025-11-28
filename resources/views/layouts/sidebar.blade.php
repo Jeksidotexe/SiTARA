@@ -70,7 +70,7 @@
                         <div class="text-center me-2 d-flex align-items-center justify-content-center">
                             <i class="material-symbols-rounded opacity-5">assignment</i>
                         </div>
-                        <span class="nav-link-text ms-1">Situasi Daerah</span>
+                        <span class="nav-link-text text-wrap ms-1">Laporan Situasi Daerah</span>
                     </a>
                 </li>
                 <li class="nav-item {{ request()->routeIs('laporan_pilkada_serentak.*') ? 'active' : '' }}">
@@ -79,7 +79,7 @@
                         <div class="text-center me-2 d-flex align-items-center justify-content-center">
                             <i class="material-symbols-rounded opacity-5">assignment</i>
                         </div>
-                        <span class="nav-link-text ms-1">Pilkada Serentak</span>
+                        <span class="nav-link-text text-wrap ms-1">Laporan Harian Pilkada Serentak</span>
                     </a>
                 </li>
                 <li class="nav-item {{ request()->routeIs('laporan_kejadian_menonjol.*') ? 'active' : '' }}">
@@ -88,7 +88,7 @@
                         <div class="text-center me-2 d-flex align-items-center justify-content-center">
                             <i class="material-symbols-rounded opacity-5">assignment</i>
                         </div>
-                        <span class="nav-link-text ms-1">Kejadian Menonjol</span>
+                        <span class="nav-link-text text-wrap ms-1">Laporan Harian Kejadian Menonjol</span>
                     </a>
                 </li>
                 <li class="nav-item {{ request()->routeIs('laporan_pelanggaran_kampanye.*') ? 'active' : '' }}">
@@ -97,7 +97,7 @@
                         <div class="text-center me-2 d-flex align-items-center justify-content-center">
                             <i class="material-symbols-rounded opacity-5">assignment</i>
                         </div>
-                        <span class="nav-link-text ms-1">Pelanggaran Kampanye</span>
+                        <span class="nav-link-text text-wrap ms-1">Laporan Harian Pelanggaran Kampanye</span>
                     </a>
                 </li>
                 <li class="nav-item {{ request()->routeIs('laporan_penguatan_ideologi.*') ? 'active' : '' }}">
@@ -106,7 +106,7 @@
                         <div class="text-center me-2 d-flex align-items-center justify-content-center">
                             <i class="material-symbols-rounded opacity-5">assignment</i>
                         </div>
-                        <span class="nav-link-text ms-1">Penguatan Ideologi</span>
+                        <span class="nav-link-text text-wrap ms-1">Laporan Penguatan Ideologi Pancasila dan Karakter</span>
                     </a>
                 </li>
             @endif

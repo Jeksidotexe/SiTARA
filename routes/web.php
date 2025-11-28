@@ -79,7 +79,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         });
     });
 
-    // --- Rute Operator (Manajemen Laporan) ---
+    // --- Rute Operator ---
     Route::middleware(['role:operator'])->group(function () {
         Route::get('laporan_situasi_daerah/data', [LaporanSituasiDaerahController::class, 'data'])->name('laporan_situasi_daerah.data');
         Route::resource('laporan_situasi_daerah', LaporanSituasiDaerahController::class)->except(['show']);
@@ -103,7 +103,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('pengaturan-wilayah.update');
     });
 
-    // --- Rute Pimpinan (Verifikasi) ---
+    // --- Rute Pimpinan ---
     Route::middleware(['role:pimpinan'])->prefix('verifikasi')->name('verifikasi.')->group(function () {
         // Halaman daftar laporan menunggu verifikasi
         Route::get('/pending', [VerificationController::class, 'pendingList'])->name('pending');
@@ -119,12 +119,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/history/data', [VerificationController::class, 'historyData'])->name('history.data');
     });
 
-    // --- Rute Umum (Detail Laporan bisa diakses Pimpinan juga) ---
-    // Pastikan route show tidak eksklusif untuk operator/admin jika pimpinan perlu akses
-    // Jika show dipindah ke sini, hapus except(['show']) di atas
+    // --- Rute Umum ---
     Route::get('laporan_situasi_daerah/{laporan_situasi_daerah}', [LaporanSituasiDaerahController::class, 'show'])->name('laporan_situasi_daerah.show');
     Route::get('laporan_pilkada_serentak/{laporan_pilkada_serentak}', [LaporanPilkadaSerentakController::class, 'show'])->name('laporan_pilkada_serentak.show');
     Route::get('laporan_kejadian_menonjol/{laporan_kejadian_menonjol}', [LaporanKejadianMenonjolController::class, 'show'])->name('laporan_kejadian_menonjol.show');
     Route::get('laporan_pelanggaran_kampanye/{laporan_pelanggaran_kampanye}', [LaporanPelanggaranKampanyeController::class, 'show'])->name('laporan_pelanggaran_kampanye.show');
     Route::get('laporan_penguatan_ideologi/{laporan_penguatan_ideologi}', [LaporanPenguatanIdeologiController::class, 'show'])->name('laporan_penguatan_ideologi.show');
+
+    Route::get('laporan_situasi_daerah/{id}/preview-pdf', [LaporanSituasiDaerahController::class, 'previewPdf'])
+        ->name('laporan_situasi_daerah.previewPdf');
+    Route::get('laporan_pilkada_serentak/{id}/preview-pdf', [LaporanPilkadaSerentakController::class, 'previewPdf'])
+        ->name('laporan_pilkada_serentak.previewPdf');
+    Route::get('laporan_kejadian_menonjol/{id}/preview-pdf', [LaporanKejadianMenonjolController::class, 'previewPdf'])
+        ->name('laporan_kejadian_menonjol.previewPdf');
+    Route::get('laporan_pelanggaran_kampanye/{id}/preview-pdf', [LaporanPelanggaranKampanyeController::class, 'previewPdf'])
+        ->name('laporan_pelanggaran_kampanye.previewPdf');
+    Route::get('laporan_penguatan_ideologi/{id}/preview-pdf', [LaporanPenguatanIdeologiController::class, 'previewPdf'])
+        ->name('laporan_penguatan_ideologi.previewPdf');
 });
