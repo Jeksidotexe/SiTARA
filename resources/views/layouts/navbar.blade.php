@@ -74,21 +74,26 @@
                             @foreach ($notifications as $notification)
                                 @php
                                     $baseUrl = $notification->data['url'] ?? route('dashboard');
-                                    // Cek apakah URL sudah memiliki query string '?'
                                     $separator = Str::contains($baseUrl, '?') ? '&' : '?';
                                     $finalUrl = $baseUrl . $separator . 'mark_as_read=' . $notification->id;
                                 @endphp
                                 <li class="mb-2 notification-item" data-id="{{ $notification->id }}">
                                     <a class="dropdown-item border-radius-md {{ $notification->read() ? '' : 'bg-gray-100' }}"
-                                        href="{{ $finalUrl }}"> {{-- <-- Gunakan URL final --}}
+                                        href="{{ $finalUrl }}">
                                         <div class="d-flex py-1">
                                             <div class="my-auto">
-                                                {{-- Ikon berdasarkan status --}}
-                                                @if (Str::contains($notification->data['message'], 'disetujui'))
+                                                @if (Str::contains($notification->data['message'], 'disetujui') ||
+                                                        Str::contains($notification->data['message'], 'Terverifikasi'))
                                                     <div
                                                         class="text-center me-2 d-flex align-items-center justify-content-center">
                                                         <i
                                                             class="material-symbols-rounded avatar avatar-sm text-success bg-gradient-light me-3 py-2">check_circle</i>
+                                                    </div>
+                                                @elseif(Str::contains($notification->data['message'], 'Masuk'))
+                                                    <div
+                                                        class="text-center me-2 d-flex align-items-center justify-content-center">
+                                                        <i
+                                                            class="material-symbols-rounded avatar avatar-sm text-info bg-gradient-light me-3 py-2">inbox</i>
                                                     </div>
                                                 @elseif(Str::contains($notification->data['message'], 'revisi'))
                                                     <div

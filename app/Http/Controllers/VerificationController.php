@@ -18,6 +18,9 @@ use App\Models\LaporanPenguatanIdeologi;
 use Yajra\DataTables\Facades\DataTables;
 use App\Models\LaporanPelanggaranKampanye;
 use App\Notifications\NotifikasiUntukOperator;
+use App\Models\User;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\NotifikasiLaporanBaruUntukAdmin;
 
 class VerificationController extends Controller
 {
@@ -72,10 +75,11 @@ class VerificationController extends Controller
 
         if ($report->approve()) {
             try {
-                $report->load('operator');
+                $report->load('operator.wilayah');
+
                 if ($report->operator) {
                     $tanggalFormatted = $report->tanggal_laporan?->isoFormat('D MMMM YYYY') ?? '';
-                    $message = 'Laporan Anda "' . Str::limit(strip_tags($report->judul), 50) . '" Tanggal ' . $tanggalFormatted . ' telah disetujui.';
+                    $messageOperator = 'Laporan Anda "' . Str::limit(strip_tags($report->judul), 50) . '" Tanggal ' . $tanggalFormatted . ' telah disetujui.';
 
                     $url = '#';
                     if ($reportConfig) {
@@ -83,11 +87,25 @@ class VerificationController extends Controller
                         $url = route($reportConfig['route_base'] . '.show', [$paramName => $report->id_laporan, 'from' => 'notification']);
                     }
 
-                    $report->operator->notify(new NotifikasiUntukOperator($report, $message, $url));
+                    $report->operator->notify(new NotifikasiUntukOperator($report, $messageOperator, $url));
                     LaporanStatusUpdated::dispatch($report->id_laporan, $report->status_laporan);
+
+                    $admins = User::where('role', 'admin')->get();
+
+                    if ($admins->count() > 0 && $reportConfig) {
+                        $namaWilayah = $report->operator->wilayah->nama_wilayah ?? 'Wilayah Tidak Diketahui';
+                        $jenisLaporan = $reportConfig['title'];
+
+                        Notification::send($admins, new NotifikasiLaporanBaruUntukAdmin(
+                            $report,
+                            $jenisLaporan,
+                            $namaWilayah,
+                            $url
+                        ));
+                    }
                 }
             } catch (\Exception $e) {
-                Log::error('Gagal mengirim notifikasi approve ke operator: ' . $e->getMessage());
+                Log::error('Gagal mengirim notifikasi: ' . $e->getMessage());
             }
             $newStatus = $request->input('status_wilayah_baru');
             if ($newStatus) {
