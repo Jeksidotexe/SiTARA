@@ -75,38 +75,6 @@
                     margin-bottom: 1rem;
                     font-size: 0.875rem;
                 }
-
-                #materialToast {
-                    overflow: hidden;
-                    position: relative;
-                    border-radius: 0.75rem;
-                    border: none;
-                }
-
-                @keyframes toastProgress {
-                    from {
-                        width: 100%;
-                    }
-
-                    to {
-                        width: 0%;
-                    }
-                }
-
-                .toast-progress-bar {
-                    position: absolute;
-                    bottom: 0;
-                    left: 0;
-                    height: 5px;
-                    width: 100%;
-                    z-index: 10;
-                }
-
-                .toast-progress-running {
-                    animation-name: toastProgress;
-                    animation-timing-function: linear;
-                    animation-fill-mode: forwards;
-                }
             </style>
         @endpush
         @stack('styles')
@@ -120,7 +88,7 @@
         <div class="position-fixed end-3" style="top: 4.5rem; z-index: 1090; max-width: 350px;">
             <div id="materialToast" class="toast hide shadow-lg" role="alert" aria-live="assertive"
                 aria-atomic="true">
-                <div class="toast-header border-0">
+                <div class="toast-header">
                     <span class="material-symbols-rounded me-2" id="toastIcon"></span>
                     <strong class="me-auto" id="toastTitle"></strong>
                     <small id="toastTime"></small>
@@ -128,9 +96,8 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="toast-body bg-white" id="toastBody" style="padding-bottom: 1.5rem;">
+                <div class="toast-body bg-white" id="toastBody">
                 </div>
-                <div id="toastProgressBar" class="toast-progress-bar" role="progressbar"></div>
             </div>
         </div>
         <!-- Sidebar -->
@@ -625,61 +592,45 @@
             const toastBody = document.getElementById('toastBody');
             const toastIcon = document.getElementById('toastIcon');
             const toastTime = document.getElementById('toastTime');
-            const toastProgressBar = document.getElementById('toastProgressBar');
 
             let materialToast;
-            const toastDelay = 5000;
 
             if (toastEl) {
                 materialToast = new bootstrap.Toast(toastEl, {
-                    delay: toastDelay,
-                    autohide: true
-                });
-
-                toastEl.addEventListener('hidden.bs.toast', function() {
-                    toastProgressBar.style.width = '100%';
-                    toastProgressBar.classList.remove('toast-progress-running');
+                    delay: 5000
                 });
             }
 
             function showMaterialToast(message, type, headerTitle, headerTime = 'Baru saja', iconClass) {
                 if (!materialToast) return;
 
-                const classesToRemove = ['text-success', 'text-danger', 'text-warning', 'text-info', 'bg-gradient-success',
-                    'bg-gradient-danger', 'bg-gradient-warning', 'bg-gradient-info'
-                ];
+                const classesToRemove = ['text-success', 'text-danger', 'text-warning', 'text-info'];
                 toastIcon.classList.remove(...classesToRemove);
                 toastTitle.classList.remove(...classesToRemove);
-                toastProgressBar.classList.remove(...classesToRemove);
 
                 let iconColorClass = 'text-info';
-                let progressBgClass = 'bg-gradient-info';
                 let finalHeaderTitle = headerTitle;
                 let finalIconClass = iconClass;
 
                 switch (type) {
                     case 'success':
                         iconColorClass = 'text-success';
-                        progressBgClass = 'bg-gradient-success';
                         if (!finalIconClass) finalIconClass = 'check_circle';
                         if (!finalHeaderTitle) finalHeaderTitle = 'Berhasil';
                         break;
                     case 'danger':
                         iconColorClass = 'text-danger';
-                        progressBgClass = 'bg-gradient-danger';
                         if (!finalIconClass) finalIconClass = 'error';
                         if (!finalHeaderTitle) finalHeaderTitle = 'Error';
                         break;
                     case 'warning':
                         iconColorClass = 'text-warning';
-                        progressBgClass = 'bg-gradient-warning';
                         if (!finalIconClass) finalIconClass = 'warning';
                         if (!finalHeaderTitle) finalHeaderTitle = 'Peringatan';
                         break;
                     case 'info':
                     default:
                         iconColorClass = 'text-info';
-                        progressBgClass = 'bg-gradient-info';
                         if (!finalIconClass) finalIconClass = 'info';
                         if (!finalHeaderTitle) finalHeaderTitle = 'Informasi';
                         break;
@@ -690,22 +641,13 @@
                     toastTitle.classList.add(iconColorClass);
                 }
 
-                toastProgressBar.classList.add(progressBgClass);
-
                 toastIcon.innerText = finalIconClass;
                 toastTitle.innerText = finalHeaderTitle;
                 toastTime.innerText = headerTime;
                 toastBody.innerHTML = message;
 
-                toastProgressBar.classList.remove('toast-progress-running');
-
-                void toastProgressBar.offsetWidth;
-
-                toastProgressBar.style.animationDuration = (toastDelay / 1000) + 's';
-
-                toastProgressBar.classList.add('toast-progress-running');
-
                 materialToast.show();
+
             }
 
             document.addEventListener('DOMContentLoaded', function() {
@@ -1306,6 +1248,26 @@
                 });
             </script>
         @endauth
+
+        <script>
+            function decrementSidebarBadge() {
+                const badgeElement = document.getElementById('sidebar-pending-badge');
+                const countElement = document.getElementById('sidebar-pending-count');
+
+                if (countElement && badgeElement) {
+                    let currentCount = parseInt(countElement.innerText) || 0;
+
+                    if (currentCount > 0) {
+                        currentCount = currentCount - 1;
+                        countElement.innerText = currentCount;
+                    }
+
+                    if (currentCount <= 0) {
+                        badgeElement.style.display = 'none';
+                    }
+                }
+            }
+        </script>
     </body>
 
     </html>
