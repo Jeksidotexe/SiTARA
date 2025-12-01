@@ -191,7 +191,7 @@
                     </div>
                 @endif
 
-                <h4>II. LAPORAN PERMASALAHAN STRATEGIS:</h4>
+                <h4>II. LAPORAN PERMASALAHAN STRATEGIS</h4>
 
                 @foreach ($sectionKeys as $key)
                     @php
