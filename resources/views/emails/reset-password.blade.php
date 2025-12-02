@@ -37,8 +37,9 @@
 
                     <tr>
                         <td align="center" style="padding: 20px 0;">
-                            <img src="{{ asset('images/Logo.png') }}" alt="Logo" width="76"
+                            <img src="https://i.ibb.co.com/Szy4sRP/Logo.png" alt="Logo" width="76"
                                 style="display: block; width: 76px; height: auto;">
+                                <strong>Pemerintah Provinsi Kalimantan Barat</strong>
                         </td>
                     </tr>
 
@@ -121,7 +122,7 @@
                                 reserved.
                             </p>
                             <p style="margin: 0; font-family: 'Inter', sans-serif; font-size: 12px; color: #737373;">
-                                Email ini dibuat secara otomatis, mohon tidak membalas.
+                                Email ini dibuat secara otomatis, mohon untuk tidak membalas.
                             </p>
                         </td>
                     </tr>
