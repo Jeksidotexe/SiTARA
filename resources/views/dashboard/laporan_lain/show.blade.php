@@ -590,7 +590,7 @@
                                         @endif
                                     </div>
                                 </div>
-                                <div class="card-body p-3 bg-dark">
+                                <div class="card-body p-3 bg-gradient-dark">
                                     <div id="pdf-preview-container"
                                         style="width: 100%; height: 800px; border-radius: 0.75rem; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
                                         <div id="pdf-loading"

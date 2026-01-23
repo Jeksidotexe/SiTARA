@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\LaporanKejadianMenonjol;
+use App\Models\LaporanLain;
 use App\Models\LaporanPelanggaranKampanye;
 use App\Models\LaporanPenguatanIdeologi;
 use App\Models\Wilayah;
@@ -44,14 +45,15 @@ class DaftarLaporanBulananController extends Controller
             'title' => 'Laporan Penguatan Ideologi',
             'route_base' => 'laporan_penguatan_ideologi',
         ],
+        'laporan-lain' => [
+            'class' => LaporanLain::class,
+            'title' => 'Laporan Lain-Lain',
+            'route_base' => 'laporan_lain'
+        ]
     ];
 
     public function index(Request $request)
     {
-        if (Auth::user()->role !== 'admin') {
-            abort(403, 'Akses ditolak.');
-        }
-
         $selectedYear = $request->input('year', now()->year);
 
         $yearQueries = [];
@@ -106,10 +108,6 @@ class DaftarLaporanBulananController extends Controller
 
     public function showMonths(Request $request, Wilayah $wilayah)
     {
-        if (Auth::user()->role !== 'admin') {
-            abort(403, 'Akses ditolak.');
-        }
-
         $year = $request->input('year', now()->year);
 
         $distinctReportDays = collect();
@@ -174,156 +172,83 @@ class DaftarLaporanBulananController extends Controller
 
     public function data(Request $request, Wilayah $wilayah, $month)
     {
-        if (Auth::user()->role !== 'admin') {
-            abort(403, 'Akses ditolak.');
-        }
+        $month = (int) $month;
         if ($month < 1 || $month > 12) {
             abort(404, 'Bulan tidak valid.');
         }
 
-        $year = $request->input('year', now()->year);
+        $year = (int) $request->input('year', now()->year);
         $filterReportType = $request->input('report_type');
 
-        $allQueries = collect();
         $modelsToQuery = [];
-
         if (!empty($filterReportType) && isset($this->reportModels[$filterReportType])) {
             $modelsToQuery[$filterReportType] = $this->reportModels[$filterReportType];
         } else {
             $modelsToQuery = $this->reportModels;
         }
 
+        $resultCollection = collect();
+
         foreach ($modelsToQuery as $key => $config) {
-            $tipeLaporan = $config['title'];
             $modelClass = $config['class'];
             $routeBase = $config['route_base'];
 
-            $query = $modelClass::with('operator.wilayah')
+            $data = $modelClass::with('operator.wilayah')
                 ->where('status_laporan', 'disetujui')
                 ->whereYear('tanggal_laporan', $year)
                 ->whereMonth('tanggal_laporan', $month)
-                ->whereHas('operator.wilayah', function ($query) use ($wilayah) {
-                    $query->where('id_wilayah', $wilayah->id_wilayah);
+                ->whereHas('operator.wilayah', function ($q) use ($wilayah) {
+                    $q->where('id_wilayah', $wilayah->id_wilayah);
                 })
-                ->select(
-                    'id_laporan',
-                    'tanggal_laporan',
-                    'judul',
-                    'narasi_a',
-                    'narasi_b',
-                    'narasi_c',
-                    'narasi_d',
-                    'narasi_e',
-                    'narasi_f',
-                    'narasi_g',
-                    'narasi_h',
-                    DB::raw("'$tipeLaporan' as tipe_laporan"),
-                    DB::raw("'$routeBase' as route_base")
-                );
+                ->latest('tanggal_laporan')
+                ->get();
 
-            $allQueries->push($query);
+            $transformed = $data->map(function ($item) use ($routeBase) {
+                return [
+                    'id_laporan'          => $item->id_laporan,
+                    'tanggal_laporan'     => $item->tanggal_laporan,
+                    'tanggal_display'     => Carbon::parse($item->tanggal_laporan)->isoFormat('D MMMM YYYY'),
+                    'route_base'          => $routeBase,
+
+                    'pemerintahan_daerah' => $this->cleanText($item->narasi_a),
+                    'program_pembangunan' => $this->cleanText($item->narasi_b),
+                    'pelayanan_publik'    => $this->cleanText($item->narasi_c),
+                    'ideologi'            => $this->cleanText($item->narasi_d),
+                    'politik'             => $this->cleanText($item->narasi_e),
+                    'ekonomi'             => $this->cleanText($item->narasi_f),
+                    'sosial_budaya'       => $this->cleanText($item->narasi_g),
+                    'hankam'              => $this->cleanText($item->narasi_h),
+                ];
+            });
+
+            $resultCollection = $resultCollection->concat($transformed);
         }
 
-        if ($allQueries->isEmpty()) {
-            return DataTables::of(collect())->make(true);
-        }
-
-        $laporans = $allQueries->shift();
-        if ($laporans) {
-            foreach ($allQueries as $q) {
-                $laporans->unionAll($q);
-            }
-            $laporans->latest('tanggal_laporan');
-        } else {
-            $laporans = collect();
-        }
-
-        return DataTables::of($laporans)
+        return DataTables::of($resultCollection)
             ->editColumn('tanggal_laporan', function ($row) {
-                return Carbon::parse($row->tanggal_laporan)->isoFormat('D MMMM YYYY');
+                return $row['tanggal_display'];
             })
-            // --- MULAI BAGIAN FORMAT KOLOM NARASI ---
-            ->addColumn('pemerintahan_daerah', function ($row) {
-                $text = strip_tags($row->narasi_a);
-                // Cek jika kosong, null, atau hanya strip
-                if (empty(trim($text)) || trim($text) === '-') {
-                    return '<span class="text-muted fst-italic small" style="opacity: 0.7;">-- Nihil --</span>';
-                }
-                return '<span title="' . e($text) . '" style="cursor:help;">' . Str::limit($text, 50) . '</span>';
-            })
-            ->addColumn('program_pembangunan', function ($row) {
-                $text = strip_tags($row->narasi_b);
-                if (empty(trim($text)) || trim($text) === '-') {
-                    return '<span class="text-muted fst-italic small" style="opacity: 0.7;">-- Nihil --</span>';
-                }
-                return '<span title="' . e($text) . '" style="cursor:help;">' . Str::limit($text, 50) . '</span>';
-            })
-            ->addColumn('pelayanan_publik', function ($row) {
-                $text = strip_tags($row->narasi_c);
-                if (empty(trim($text)) || trim($text) === '-') {
-                    return '<span class="text-muted fst-italic small" style="opacity: 0.7;">-- Nihil --</span>';
-                }
-                return '<span title="' . e($text) . '" style="cursor:help;">' . Str::limit($text, 50) . '</span>';
-            })
-            ->addColumn('ideologi', function ($row) {
-                $text = strip_tags($row->narasi_d);
-                if (empty(trim($text)) || trim($text) === '-') {
-                    return '<span class="text-muted fst-italic small" style="opacity: 0.7;">-- Nihil --</span>';
-                }
-                return '<span title="' . e($text) . '" style="cursor:help;">' . Str::limit($text, 50) . '</span>';
-            })
-            ->addColumn('politik', function ($row) {
-                $text = strip_tags($row->narasi_e);
-                if (empty(trim($text)) || trim($text) === '-') {
-                    return '<span class="text-muted fst-italic small" style="opacity: 0.7;">-- Nihil --</span>';
-                }
-                return '<span title="' . e($text) . '" style="cursor:help;">' . Str::limit($text, 50) . '</span>';
-            })
-            ->addColumn('ekonomi', function ($row) {
-                $text = strip_tags($row->narasi_f);
-                if (empty(trim($text)) || trim($text) === '-') {
-                    return '<span class="text-muted fst-italic small" style="opacity: 0.7;">-- Nihil --</span>';
-                }
-                return '<span title="' . e($text) . '" style="cursor:help;">' . Str::limit($text, 50) . '</span>';
-            })
-            ->addColumn('sosial_budaya', function ($row) {
-                $text = strip_tags($row->narasi_g);
-                if (empty(trim($text)) || trim($text) === '-') {
-                    return '<span class="text-muted fst-italic small" style="opacity: 0.7;">-- Nihil --</span>';
-                }
-                return '<span title="' . e($text) . '" style="cursor:help;">' . Str::limit($text, 50) . '</span>';
-            })
-            ->addColumn('hankam', function ($row) {
-                $text = strip_tags($row->narasi_h);
-                if (empty(trim($text)) || trim($text) === '-') {
-                    return '<span class="text-muted fst-italic small" style="opacity: 0.7;">-- Nihil --</span>';
-                }
-                return '<span title="' . e($text) . '" style="cursor:help;">' . Str::limit($text, 50) . '</span>';
-            })
-            // --- AKHIR BAGIAN FORMAT KOLOM NARASI ---
+            ->editColumn('pemerintahan_daerah', fn($row) => $this->renderNarasiColumn($row['pemerintahan_daerah']))
+            ->editColumn('program_pembangunan', fn($row) => $this->renderNarasiColumn($row['program_pembangunan']))
+            ->editColumn('pelayanan_publik',    fn($row) => $this->renderNarasiColumn($row['pelayanan_publik']))
+            ->editColumn('ideologi',            fn($row) => $this->renderNarasiColumn($row['ideologi']))
+            ->editColumn('politik',             fn($row) => $this->renderNarasiColumn($row['politik']))
+            ->editColumn('ekonomi',             fn($row) => $this->renderNarasiColumn($row['ekonomi']))
+            ->editColumn('sosial_budaya',       fn($row) => $this->renderNarasiColumn($row['sosial_budaya']))
+            ->editColumn('hankam',              fn($row) => $this->renderNarasiColumn($row['hankam']))
+
             ->addColumn('aksi', function ($row) {
-                $paramName = str_replace('-', '_', $row->route_base);
-                $showUrl = route($row->route_base . '.show', [
-                    $paramName => $row->id_laporan,
+                $paramName = str_replace('-', '_', $row['route_base']);
+                $showUrl = route($row['route_base'] . '.show', [
+                    $paramName => $row['id_laporan'],
                     'from' => 'laporan-bulanan'
                 ]);
+
                 return '
                     <a href="' . $showUrl . '" class="btn btn-sm btn-dark-blue bg-gradient-dark-blue">
                         <i class="fa fa-eye"></i> Detail
                     </a>';
             })
-            ->only([
-                'tanggal_laporan',
-                'pemerintahan_daerah',
-                'program_pembangunan',
-                'pelayanan_publik',
-                'ideologi',
-                'politik',
-                'ekonomi',
-                'sosial_budaya',
-                'hankam',
-                'aksi'
-            ])
             ->rawColumns([
                 'pemerintahan_daerah',
                 'program_pembangunan',
@@ -336,5 +261,33 @@ class DaftarLaporanBulananController extends Controller
                 'aksi'
             ])
             ->make(true);
+    }
+
+    /**
+     * Helper untuk membersihkan teks dari HTML tags dan spasi berlebih.
+     * Digunakan untuk keperluan Search Indexing.
+     */
+    private function cleanText($text)
+    {
+        if (empty($text) || trim($text) === '-') {
+            return '';
+        }
+        return trim(strip_tags($text));
+    }
+
+    /**
+     * Helper untuk merender tampilan kolom narasi (HTML).
+     * Menerapkan escaping (e()) untuk mencegah XSS pada atribut title.
+     */
+    private function renderNarasiColumn($cleanText)
+    {
+        if (empty($cleanText)) {
+            return '<span class="text-muted fst-italic small" style="opacity: 0.7;">-- Nihil --</span>';
+        }
+
+        $safeText = e($cleanText);
+        $shortText = Str::limit($cleanText, 50);
+
+        return '<span title="' . $safeText . '" style="cursor:help;">' . $shortText . '</span>';
     }
 }

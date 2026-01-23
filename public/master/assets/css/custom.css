@@ -193,3 +193,89 @@
 #foto-preview-wrapper:not(.has-image-preview) {
     display: none;
 }
+
+/* Sembunyikan elemen teks tambahan saat sidebar dalam mode mini */
+.g-sidenav-hidden .sidenav .nav-link-text,
+.g-sidenav-hidden .sidenav .navbar-brand span,
+.g-sidenav-hidden .sidenav .navbar-heading,
+.g-sidenav-hidden .sidenav .badge {
+    display: none !important;
+}
+
+/* Atur agar ikon berada di tengah saat mode mini */
+.g-sidenav-hidden .sidenav .nav-item .nav-link {
+    justify-content: center;
+}
+
+.g-sidenav-hidden .sidenav .nav-item .nav-link .text-center {
+    margin-right: 0 !important;
+}
+
+/* Pastikan transisi halus saat membesar/mengecil */
+.sidenav {
+    transition: all 0.2s ease-in-out !important;
+}
+
+
+/* SIDEBAR BEHAVIOR (COLLAPSE MODE & HOVER MODE) */
+@media (min-width: 1200px) {
+    body.g-sidenav-hidden .sidenav .sidenav-footer {
+        padding: 0 0.5rem !important;
+    }
+
+    body.g-sidenav-hidden .sidenav .sidenav-footer .btn span {
+        display: none !important;
+    }
+
+    body.g-sidenav-hidden .sidenav .sidenav-footer .btn i {
+        margin-right: 0 !important;
+        margin-left: 0 !important;
+    }
+
+    body.g-sidenav-hidden #sidenav-main:hover .nav-item .nav-link {
+        justify-content: flex-start !important;
+        text-align: left !important;
+    }
+
+    body.g-sidenav-hidden #sidenav-main .navbar-nav>.nav-item>h6 {
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    body.g-sidenav-hidden #sidenav-main:hover .nav-item .nav-link .text-center,
+    body.g-sidenav-hidden #sidenav-main:hover .nav-item .nav-link i {
+        margin-right: 0.125rem !important;
+    }
+
+    body.g-sidenav-hidden #sidenav-main:hover .nav-link-text,
+    body.g-sidenav-hidden #sidenav-main:hover .sidenav-header .navbar-brand span {
+        display: inline-block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        width: auto !important;
+    }
+
+    body.g-sidenav-hidden #sidenav-main:hover .navbar-nav>.nav-item>h6 {
+        display: block !important;
+        opacity: 1 !important;
+    }
+
+    body.g-sidenav-hidden #sidenav-main:hover .sidenav-footer {
+        padding: 0 1rem !important;
+    }
+
+    body.g-sidenav-hidden #sidenav-main:hover .sidenav-footer .btn {
+        justify-content: center !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    body.g-sidenav-hidden #sidenav-main:hover .sidenav-footer .btn span {
+        display: inline-block !important;
+    }
+
+    body.g-sidenav-hidden #sidenav-main:hover .sidenav-footer .btn i {
+        margin-right: 0.5rem !important;
+    }
+}

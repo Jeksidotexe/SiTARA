@@ -102,21 +102,19 @@ class LaporanKejadianMenonjolController extends Controller
         $fileRule = 'file|mimes:jpg,jpeg,png|max:2048'; // 2MB
 
         foreach ($this->fileFields as $field) {
-            $fileKey = "file_$field"; // cth: "file_a"
-            // Ambil nama 'cantik' dari properti, fallback ke nama generik
+            $fileKey = "file_$field";
             $friendlyName = $this->fieldTitles[$field] ?? "Bagian $field";
 
             // Aturan Validasi
             $rules[$fileKey] = 'nullable|array';
             $rules["$fileKey.*"] = $fileRule;
 
-            // [REFAKTOR] Pesan Error Spesifik Sesuai Permintaan
+            // [REFAKTOR] Pesan Error Spesifik
             $messages["$fileKey.*.file"]  = "Upload untuk '$friendlyName' harus berupa file yang valid.";
             $messages["$fileKey.*.mimes"] = "Format file untuk '$friendlyName' tidak didukung (Hanya: jpg, jpeg, dan png).";
             $messages["$fileKey.*.max"]   = "Ukuran file untuk '$friendlyName' terlalu besar (Maks 2MB).";
         }
 
-        // Tambahkan aturan untuk 'deleted_files' (digunakan di update)
         $rules['deleted_files'] = 'nullable|array';
         $rules['deleted_files.*'] = 'nullable|array';
         $rules['deleted_files.*.*'] = 'string';
@@ -179,8 +177,8 @@ class LaporanKejadianMenonjolController extends Controller
     {
         $user = Auth::user();
 
-        $query = LaporanKejadianMenonjol::with('operator')
-            ->latest('id_laporan');
+        $query = LaporanKejadianMenonjol::with('operator');
+            // ->latest('id_laporan');
 
         $query->where('id_operator', $user->id_users);
 
@@ -523,7 +521,7 @@ class LaporanKejadianMenonjolController extends Controller
     public function destroy(LaporanKejadianMenonjol $laporan_kejadian_menonjol)
     {
         try {
-            $laporan = $laporan_kejadian_menonjol; // Tidak perlu FindOrFail
+            $laporan = $laporan_kejadian_menonjol;
 
             foreach ($this->fileFields as $field) {
                 $fileKey = "file_$field";

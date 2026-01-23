@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User; // <-- TAMBAHKAN IMPORT INI
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -12,10 +12,6 @@ class NotificationController extends Controller
     {
         $user = Auth::user();
 
-        // [PERBAIKAN]
-        // Tambahkan pengecekan ini. Ini akan memberi tahu linter
-        // bahwa $user adalah instance dari App\Models\User,
-        // yang kita tahu memiliki trait Notifiable.
         if ($user instanceof User) {
             $user->unreadNotifications()->update(['read_at' => now()]);
             return response()->json(['success' => true]);

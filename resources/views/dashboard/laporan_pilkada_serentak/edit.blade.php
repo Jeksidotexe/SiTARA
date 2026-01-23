@@ -178,11 +178,7 @@
                                                         $fullPath = asset($filePath);
                                                         $fileName = basename($filePath);
                                                         $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-                                                        $isImage = in_array($fileExt, [
-                                                            'jpg',
-                                                            'jpeg',
-                                                            'png',
-                                                        ]);
+                                                        $isImage = in_array($fileExt, ['jpg', 'jpeg', 'png']);
                                                     @endphp
 
                                                     <div class="file-list-item" data-path="{{ $filePath }}">
@@ -204,7 +200,8 @@
                                                             <i class="fa fa-eye"></i>
                                                         </button>
 
-                                                        <button type="button" class="btn btn-sm btn-danger bg-gradient-danger"
+                                                        <button type="button"
+                                                            class="btn btn-sm btn-danger bg-gradient-danger"
                                                             onclick="markForDeletion(this, '{{ $fileKey }}', '{{ $filePath }}')">
                                                             <i class="fa fa-trash"></i>
                                                         </button>
@@ -216,7 +213,7 @@
 
 
                                     <div class="mb-3">
-                                        <label class="form-label">Upload File Baru (Hanya Gambar)</label>
+                                        <label class="form-label">Upload File Baru</label>
                                         <div>
                                             <input class="custom-file-input" type="file" id="{{ $fileKey }}"
                                                 name="{{ $fileKey }}[]" multiple
@@ -276,7 +273,8 @@
                     <div id="previewFallback" style="display: none;">
                         <i class="fa fa-file-alt" style="font-size: 80px; color: #6c757d;"></i>
                         <p class="mt-3">Pratinjau tidak tersedia untuk tipe file ini.</p>
-                        <a href="" id="previewDownloadLink" class="btn btn-sm btn-dark bg-gradient-dark" target="_blank">
+                        <a href="" id="previewDownloadLink" class="btn btn-sm btn-dark bg-gradient-dark"
+                            target="_blank">
                             <i class="fa fa-download"></i> Download File
                         </a>
                     </div>
@@ -325,6 +323,7 @@
         const deletedFilesContainer = document.getElementById('deleted-files-container');
 
         function markForDeletion(button, fileKey, filePath) {
+            const deletedFilesContainer = document.getElementById('deleted-files-container');
             const item = button.closest('.file-list-item');
             const hiddenInput = document.createElement('input');
             hiddenInput.type = 'hidden';
@@ -334,25 +333,25 @@
             item.style.opacity = '0.5';
             item.style.textDecoration = 'line-through';
             button.innerHTML = '<i class="fa fa-undo"></i>';
-            button.classList.remove('btn btn-sm btn-danger bg-gradient-danger');
-            button.classList.add('btn btn-sm btn-warning bg-gradient-warning');
+            button.classList.remove('btn-danger', 'bg-gradient-danger');
+            button.classList.add('btn-warning', 'bg-gradient-warning');
+
             button.onclick = function() {
-                unmarkForDeletion(button, hiddenInput);
+                unmarkForDeletion(button, hiddenInput, fileKey, filePath);
             };
         }
 
-        function unmarkForDeletion(button, hiddenInput) {
+        function unmarkForDeletion(button, hiddenInput, fileKey, filePath) {
+            const deletedFilesContainer = document.getElementById('deleted-files-container');
             const item = button.closest('.file-list-item');
             deletedFilesContainer.removeChild(hiddenInput);
             item.style.opacity = '1';
             item.style.textDecoration = 'none';
             button.innerHTML = '<i class="fa fa-trash"></i>';
-            button.classList.remove('btn btn-sm btn-warning bg-gradient-warning');
-            button.classList.add('btn btn-sm btn-danger bg-gradient-danger');
-            const filePath = item.getAttribute('data-path');
-            const fileKey = hiddenInput.name.match(/\[(.*?)\]/)[1];
+            button.classList.remove('btn-warning', 'bg-gradient-warning');
+            button.classList.add('btn-danger', 'bg-gradient-danger');
             button.onclick = function() {
-                markForDeletion(this, fileKey, filePath);
+                markForDeletion(button, fileKey, filePath);
             };
         }
 
@@ -510,7 +509,18 @@
             menubar: true,
             statusbar: true,
             min_height: 500,
-            autoresize_bottom_margin: 20
+            autoresize_bottom_margin: 20,
+            content_style: `
+                ul, ol {
+                margin-left: 10px !important;
+                padding-left: 0 !important;
+                }
+                li {
+                margin-left: 10px !important;
+                padding-left: 0 !important;
+                list-style-position: inside !important;
+                }
+            `
         });
 
         document.addEventListener('DOMContentLoaded', function() {

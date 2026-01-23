@@ -346,7 +346,7 @@
                             <div class="info-card-custom">
                                 <div
                                     class="info-card-icon-wrapper
-                                @if ($laporan->isApproved()) bg-gradient-dark
+                                @if ($laporan->isApproved()) bg-gradient-success
                                 @elseif ($laporan->needsRevision()) bg-gradient-warning
                                 @else bg-gradient-info @endif">
                                     <i
@@ -402,11 +402,13 @@
                                             <div class="info-card-value">
                                                 @php
                                                     $wilayah = $laporan->operator->wilayah ?? null;
+                                                    $statusSaatIni = $wilayah->status_wilayah ?? 'Tidak Diketahui';
                                                 @endphp
                                                 <button type="button"
                                                     class="btn btn-sm btn-success bg-gradient-success w-100 mb-0"
                                                     id="btn-approve-sweetalert"
-                                                    data-wilayah-nama="{{ $wilayah->nama_wilayah ?? 'Wilayah Tidak Ditemukan' }}">
+                                                    data-wilayah-nama="{{ $wilayah->nama_wilayah ?? 'Wilayah Tidak Ditemukan' }}"
+                                                    data-wilayah-status="{{ $statusSaatIni }}">
                                                     <i class="fas fa-check-circle me-2"></i> Setujui
                                                 </button>
                                             </div>
@@ -458,7 +460,7 @@
 
                     @if (Auth::user()->role == 'pimpinan' && $laporan->isPending())
                         <form id="approve-form"
-                            action="{{ route('verifikasi.approve', ['reportType' => 'laporan-situasi-daerah', 'id' => $laporan->id_laporan]) }}"
+                            action="{{ route('verifikasi.approve', ['reportType' => 'laporan-pilkada-serentak', 'id' => $laporan->id_laporan]) }}"
                             method="POST" style="display: none;">
                             @csrf
                             <input type="hidden" name="catatan" value="">
@@ -470,7 +472,7 @@
                             <div class="modal-dialog modal-dialog-centered">
                                 <div class="modal-content">
                                     <form id="revision-form"
-                                        action="{{ route('verifikasi.requestRevision', ['reportType' => 'laporan-situasi-daerah', 'id' => $laporan->id_laporan]) }}"
+                                        action="{{ route('verifikasi.requestRevision', ['reportType' => 'laporan-pilkada-serentak', 'id' => $laporan->id_laporan]) }}"
                                         method="POST">
                                         @csrf
                                         <div class="modal-header">
@@ -517,7 +519,7 @@
                             @if ($laporan->isApproved())
                                 <div class="col-lg-6 col-md-6 col-sm-6 mb-4">
                                     <div class="info-card-custom">
-                                        <div class="info-card-icon-wrapper bg-gradient-success">
+                                        <div class="info-card-icon-wrapper bg-gradient-dark">
                                             <i class="fas fa-user-check"></i>
                                         </div>
                                         <div class="info-card-text-content">
@@ -534,7 +536,8 @@
                                         <div class="info-card-text-content">
                                             <div class="info-card-label">Tanggal Verifikasi</div>
                                             <div class="info-card-value">
-                                                {{ $laporan->verified_at?->isoFormat('D MMMM YYYY, HH:mm') ?? 'N/A' }}
+                                                {{ $laporan->verified_at?->translatedFormat('d F Y,') }} pukul
+                                                {{ $laporan->verified_at?->translatedFormat('H.i') }} WIB
                                             </div>
                                         </div>
                                     </div>
@@ -573,7 +576,7 @@
                     @endif
                     <div class="row mt-4">
                         <div class="col-12">
-                            <div class="card bg-gray-100">
+                            <div class="card">
                                 <div class="card-header pb-0">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div class="content-header mb-0">
@@ -587,7 +590,7 @@
                                         @endif
                                     </div>
                                 </div>
-                                <div class="card-body p-3">
+                                <div class="card-body p-3 bg-gradient-dark">
                                     <div id="pdf-preview-container"
                                         style="width: 100%; height: 800px; border-radius: 0.75rem; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
                                         <div id="pdf-loading"
@@ -625,38 +628,49 @@
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
+        let currentPdfUrl = null;
+        let isManuallyUpdating = false;
+
         function initializeLaporanScripts() {
-            console.log('[Init] Memasang ulang event listener untuk tombol...');
+            console.log('[Init] Memasang ulang event listener...');
+
             const approveForm = document.getElementById('approve-form');
             const revisionForm = document.getElementById('revision-form');
-
             const btnApprove = document.getElementById('btn-approve-sweetalert');
             const revisionModalElement = document.getElementById('revisionModal');
             const catatanRevisiTextarea = document.getElementById('catatan');
 
             if (btnApprove && approveForm) {
                 btnApprove.addEventListener('click', function(event) {
+                    event.preventDefault();
                     const wilayahNama = event.currentTarget.dataset.wilayahNama || 'Wilayah';
+                    const wilayahStatus = event.currentTarget.dataset.wilayahStatus || 'Tidak Diketahui';
+
+                    let badgeClass = 'badge bg-secondary';
+                    if (wilayahStatus === 'Aman') badgeClass = 'badge bg-gradient-success';
+                    else if (wilayahStatus === 'Siaga') badgeClass = 'badge bg-gradient-warning';
+                    else if (wilayahStatus === 'Bahaya') badgeClass = 'badge bg-gradient-danger';
 
                     Swal.fire({
                         title: 'Konfirmasi & Status Wilayah',
                         html: `
-                            <p class="mb-2">Anda akan menyetujui laporan ini. Silakan tentukan status baru untuk wilayah Anda:</p>
-                            <strong class="mb-3 d-block text-dark">${wilayahNama}</strong>
-                            <div class="form-group text-start">
-                                <label for="swal-select-status" class="form-label">Status Wilayah Baru</label>
+                        <p class="mb-2">Anda akan menyetujui laporan ini. Silakan tentukan status baru untuk wilayah Anda:</p>
+                        <strong class="mb-2 d-block text-dark">${wilayahNama}</strong>
+                        <p class="mb-3 text-sm">Status saat ini : <span class="${badgeClass} ms-1">${wilayahStatus}</span></p>
+                        <div class="form-group text-start">
+                            <label for="swal-select-status" class="form-label font-weight-bold">Konfirmasi Status Wilayah:</label>
                                 <select id="swal-select-status" class="form-select form-control py-2 px-3" required>
-                                    <option value="" selected disabled>Pilih status...</option>
-                                    <option value="Aman">Aman</option>
-                                    <option value="Siaga">Siaga</option>
-                                    <option value="Bahaya">Bahaya</option>
+                                    <option value="" disabled>-- Pilih Status --</option>
+                                    <option value="Aman" ${wilayahStatus === 'Aman' ? 'selected' : ''}>Aman</option>
+                                    <option value="Siaga" ${wilayahStatus === 'Siaga' ? 'selected' : ''}>Siaga</option>
+                                    <option value="Bahaya" ${wilayahStatus === 'Bahaya' ? 'selected' : ''}>Bahaya</option>
                                 </select>
-                            </div>
+                        </div>
                         `,
                         icon: 'question',
                         showCancelButton: true,
-                        confirmButtonText: '<i class="fas fa-check-circle"></i> Ya, Setujui & Atur Status',
-                        cancelButtonText: '<i class="fas fa-times"></i> Batal',
+                        confirmButtonText: '<i class="fas fa-check-circle me-1"></i> Ya, Setujui',
+                        cancelButtonText: '<i class="fas fa-times me-1"></i> Batal',
                         confirmButtonColor: '#262626',
                         cancelButtonColor: '#67748e',
                         reverseButtons: true,
@@ -666,11 +680,9 @@
                         },
                         buttonsStyling: false,
                         preConfirm: () => {
-                            const selectedStatus = document.getElementById('swal-select-status')
-                                .value;
+                            const selectedStatus = document.getElementById('swal-select-status').value;
                             if (!selectedStatus) {
-                                Swal.showValidationMessage(
-                                    'Anda harus memilih status wilayah.');
+                                Swal.showValidationMessage('Anda harus memilih status wilayah.');
                                 return false;
                             }
                             return selectedStatus;
@@ -678,18 +690,60 @@
                     }).then((result) => {
                         if (result.isConfirmed) {
                             const newStatus = result.value;
-                            document.getElementById('input-status-wilayah-baru').value = newStatus;
+
+                            isManuallyUpdating = true;
+
                             Swal.fire({
-                                title: 'Memproses...',
-                                text: 'Mohon tunggu sebentar',
+                                title: 'Memproses Persetujuan',
+                                html: 'Mohon tunggu, sistem sedang memverifikasi laporan...',
                                 allowOutsideClick: false,
-                                allowEscapeKey: false,
                                 showConfirmButton: false,
                                 didOpen: () => {
                                     Swal.showLoading();
                                 }
                             });
-                            approveForm.submit();
+
+                            const formData = new FormData(approveForm);
+                            formData.append('status_wilayah_baru', newStatus);
+
+                            fetch(approveForm.action, {
+                                    method: 'POST',
+                                    body: formData,
+                                    headers: {
+                                        'X-Requested-With': 'XMLHttpRequest',
+                                        'Accept': 'application/json'
+                                    }
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    Swal.close();
+
+                                    if (data.success) {
+                                        showMaterialToast(data.message || 'Laporan berhasil disetujui.',
+                                            'success');
+
+                                        if (typeof decrementSidebarBadge === 'function') {
+                                            decrementSidebarBadge();
+                                        }
+
+                                        setTimeout(() => {
+                                            updatePageContent();
+                                            setTimeout(() => {
+                                                isManuallyUpdating = false;
+                                            }, 3000);
+                                        }, 500);
+                                    } else {
+                                        isManuallyUpdating = false;
+                                        showMaterialToast(data.message || 'Terjadi kesalahan.',
+                                            'danger');
+                                    }
+                                })
+                                .catch(error => {
+                                    Swal.close();
+                                    isManuallyUpdating = false;
+                                    console.error('Error:', error);
+                                    showMaterialToast('Terjadi kesalahan jaringan.', 'danger');
+                                });
                         }
                     });
                 });
@@ -698,59 +752,91 @@
             if (revisionForm && catatanRevisiTextarea) {
                 revisionForm.addEventListener('submit', function(event) {
                     event.preventDefault();
-                    let isValid = true;
-                    let errorMsgElement = catatanRevisiTextarea.parentNode.querySelector(
-                        '.invalid-feedback');
 
                     if (!catatanRevisiTextarea.value.trim()) {
-                        isValid = false;
                         catatanRevisiTextarea.classList.add('is-invalid');
-                        if (!errorMsgElement) {
-                            errorMsgElement = document.createElement('div');
-                            errorMsgElement.className = 'invalid-feedback d-block';
-                            catatanRevisiTextarea.parentNode.appendChild(errorMsgElement);
+                        let errorMsg = catatanRevisiTextarea.parentNode.querySelector('.invalid-feedback');
+                        if (!errorMsg) {
+                            errorMsg = document.createElement('div');
+                            errorMsg.className = 'invalid-feedback d-block';
+                            catatanRevisiTextarea.parentNode.appendChild(errorMsg);
                         }
-                        errorMsgElement.textContent = 'Catatan revisi tidak boleh kosong.';
-                        catatanRevisiTextarea.focus();
-                    } else {
-                        catatanRevisiTextarea.classList.remove('is-invalid');
-                        if (errorMsgElement) {
-                            errorMsgElement.remove();
-                        }
-                    }
-
-                    if (!isValid) {
+                        errorMsg.textContent = 'Catatan revisi wajib diisi.';
                         return;
                     }
 
                     Swal.fire({
                         title: 'Konfirmasi Revisi',
-                        html: "Anda yakin ingin mengirim permintaan <strong>REVISI</strong>?<br><small class='text-muted'>Operator akan menerima notifikasi untuk memperbaiki laporan.</small>",
+                        html: "Anda yakin ingin meminta <strong>REVISI</strong>?",
                         icon: 'warning',
                         showCancelButton: true,
-                        confirmButtonText: '<i class="fas fa-paper-plane me-1"></i> Ya, Kirim!',
+                        confirmButtonText: '<i class="fas fa-paper-plane me-1"></i> Ya, Kirim',
                         cancelButtonText: '<i class="fas fa-times me-1"></i> Batal',
                         confirmButtonColor: '#262626',
                         cancelButtonColor: '#67748e',
                         reverseButtons: true,
                         customClass: {
-                            confirmButton: 'btn btn-sm btn-dark bg-gradient-dark ms-2',
-                            cancelButton: 'btn btn-sm btn-secondary bg-gradient-secondary me-2'
+                            confirmButton: 'btn btn-sm btn-dark bg-gradient-dark ms-1',
+                            cancelButton: 'btn btn-sm btn-secondary bg-gradient-secondary me-1'
                         },
-                        buttonsStyling: false
+                        buttonsStyling: false,
                     }).then((result) => {
                         if (result.isConfirmed) {
+                            isManuallyUpdating = true;
+
                             Swal.fire({
-                                title: 'Mengirim...',
-                                text: 'Mohon tunggu sebentar',
+                                title: 'Mengirim Revisi',
+                                html: 'Mohon tunggu...',
                                 allowOutsideClick: false,
-                                allowEscapeKey: false,
                                 showConfirmButton: false,
                                 didOpen: () => {
                                     Swal.showLoading();
                                 }
                             });
-                            event.target.submit();
+
+                            const formData = new FormData(revisionForm);
+
+                            fetch(revisionForm.action, {
+                                    method: 'POST',
+                                    body: formData,
+                                    headers: {
+                                        'X-Requested-With': 'XMLHttpRequest',
+                                        'Accept': 'application/json'
+                                    }
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    Swal.close();
+
+                                    if (data.success) {
+                                        const modal = bootstrap.Modal.getInstance(revisionModalElement);
+                                        if (modal) modal.hide();
+
+                                        showMaterialToast(data.message || 'Permintaan revisi terkirim.',
+                                            'success');
+
+                                        if (typeof decrementSidebarBadge === 'function') {
+                                            decrementSidebarBadge();
+                                        }
+
+                                        setTimeout(() => {
+                                            updatePageContent();
+                                            setTimeout(() => {
+                                                isManuallyUpdating = false;
+                                            }, 3000);
+                                        }, 500);
+                                    } else {
+                                        isManuallyUpdating = false;
+                                        showMaterialToast(data.message || 'Terjadi kesalahan.',
+                                            'danger');
+                                    }
+                                })
+                                .catch(error => {
+                                    Swal.close();
+                                    isManuallyUpdating = false;
+                                    console.error('Error:', error);
+                                    showMaterialToast('Terjadi kesalahan jaringan.', 'danger');
+                                });
                         }
                     });
                 });
@@ -758,128 +844,145 @@
                 if (revisionModalElement) {
                     revisionModalElement.addEventListener('hidden.bs.modal', function() {
                         catatanRevisiTextarea.classList.remove('is-invalid');
-                        let errorMsg = catatanRevisiTextarea.parentNode.querySelector(
-                            '.invalid-feedback');
-                        if (errorMsg) {
-                            errorMsg.remove();
-                        }
                         catatanRevisiTextarea.value = '';
+                        const err = catatanRevisiTextarea.parentNode.querySelector('.invalid-feedback');
+                        if (err) err.remove();
                     });
                 }
             }
         }
-        document.addEventListener('DOMContentLoaded', initializeLaporanScripts);
+
+        function updatePageContent() {
+            const contentWrapperId = 'laporan-content-wrapper';
+
+            fetch(window.location.href, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const newDoc = parser.parseFromString(html, 'text/html');
+                    const newContent = newDoc.getElementById(contentWrapperId);
+                    const oldContent = document.getElementById(contentWrapperId);
+
+                    if (newContent && oldContent) {
+                        oldContent.innerHTML = newContent.innerHTML;
+                        console.log('[Update] Konten berhasil diperbarui.');
+
+                        initializeLaporanScripts();
+
+                        loadPdf();
+                    }
+                })
+                .catch(error => console.error('[Update] Gagal fetch konten:', error));
+        }
+
+        function loadPdf() {
+            const container = document.getElementById('pdf-preview-container');
+            const loading = document.getElementById('pdf-loading');
+            const errorDiv = document.getElementById('pdf-error');
+
+            if (!container) return;
+
+            loading.style.display = 'block';
+            errorDiv.style.display = 'none';
+
+            const oldIframe = document.getElementById('pdf-iframe');
+            if (oldIframe) oldIframe.remove();
+
+            if (currentPdfUrl) {
+                URL.revokeObjectURL(currentPdfUrl);
+                currentPdfUrl = null;
+            }
+
+            const timestamp = new Date().getTime();
+            const baseUrl = "{{ route('laporan_pilkada_serentak.previewPdf', $laporan->id_laporan) }}";
+            const url = `${baseUrl}?t=${timestamp}`;
+
+            fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Gagal memuat PDF');
+                    return response.blob();
+                })
+                .then(blob => {
+                    currentPdfUrl = URL.createObjectURL(blob);
+
+                    const newIframe = document.createElement('iframe');
+                    newIframe.id = 'pdf-iframe';
+                    newIframe.width = '100%';
+                    newIframe.height = '100%';
+                    newIframe.style.border = 'none';
+                    newIframe.style.opacity = '0';
+                    newIframe.style.transition = 'opacity 0.3s ease';
+                    newIframe.setAttribute('allowfullscreen', '');
+                    newIframe.src = currentPdfUrl + "#toolbar=1&navpanes=1&scrollbar=1&view=100";
+
+                    container.appendChild(newIframe);
+
+                    newIframe.onload = function() {
+                        loading.style.display = 'none';
+                        newIframe.style.opacity = '1';
+                    };
+
+                    setTimeout(() => {
+                        if (loading.style.display !== 'none') {
+                            console.warn('[PDF] Fallback: Force show iframe.');
+                            loading.style.display = 'none';
+                            newIframe.style.opacity = '1';
+                        }
+                    }, 2000);
+                })
+                .catch(error => {
+                    console.error('Error fetching PDF:', error);
+                    loading.style.display = 'none';
+                    errorDiv.style.display = 'block';
+                });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeLaporanScripts();
+            loadPdf();
+        });
     </script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             if (typeof window.Echo !== 'undefined') {
                 const thisLaporanId = {{ $laporan->id_laporan }};
-                const contentWrapperId = 'laporan-content-wrapper';
-                console.log(`[Reverb] Mendengarkan di channel 'laporan-updates' untuk ID: ${thisLaporanId}`);
+
                 window.Echo.channel('laporan-updates')
                     .listen('.LaporanUpdated', (e) => {
-                        console.log('[Reverb] Menerima event:', e);
                         if (e.laporanId === thisLaporanId) {
-                            console.log(
-                                `[Reverb] Event ini untuk laporan ${thisLaporanId}. Melakukan update...`);
+
+                            if (isManuallyUpdating) {
+                                console.log('[Reverb] Event diabaikan (Update manual sedang berjalan).');
+                                return;
+                            }
+
                             if (e.newStatus === 'deleted') {
                                 Swal.fire({
                                     title: 'Laporan Dihapus',
-                                    text: 'Laporan yang sedang Anda lihat telah dihapus.',
+                                    text: 'Laporan yang sedang Anda lihat telah dihapus oleh operator.',
                                     icon: 'warning',
                                     showConfirmButton: false,
                                     timer: 2500,
                                     timerProgressBar: true
                                 }).then(() => {
-                                    window.location.href =
-                                        "{{ route('laporan_pilkada_serentak.index') }}";
+                                    window.location.href = "{{ route('dashboard') }}";
                                 });
                                 return;
                             }
-
-                            fetch(window.location.href)
-                                .then(response => response.text())
-                                .then(html => {
-                                    const parser = new DOMParser();
-                                    const newDoc = parser.parseFromString(html, 'text/html');
-                                    const newContent = newDoc.getElementById(contentWrapperId);
-                                    const oldContent = document.getElementById(contentWrapperId);
-
-                                    if (newContent && oldContent) {
-                                        oldContent.innerHTML = newContent.innerHTML;
-                                        console.log('[Reverb] Konten berhasil diperbarui tanpa reload.');
-                                        initializeLaporanScripts();
-                                    } else {
-                                        console.warn(
-                                            '[Reverb] Gagal menemukan wrapper konten. Melakukan fallback ke reload.'
-                                        );
-                                        location.reload();
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error('[Reverb] Gagal fetch update konten:', error);
-                                    location.reload();
-                                });
-
-                        } else {
-                            console.log(
-                                `[Reverb] Event diabaikan (untuk ID: ${e.laporanId}, halaman ini: ${thisLaporanId}).`
-                            );
+                            console.log('[Reverb] Update diterima, merefresh konten...');
+                            updatePageContent();
                         }
                     });
-
-            } else {
-                console.error('Laravel Echo not initialized. Pastikan master layout memuatnya.');
             }
         });
-    </script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            loadPdf();
-        });
-
-        function loadPdf() {
-            const iframe = document.getElementById('pdf-iframe');
-            const loading = document.getElementById('pdf-loading');
-            const errorDiv = document.getElementById('pdf-error');
-            const url = "{{ route('laporan_pilkada_serentak.previewPdf', $laporan->id_laporan) }}";
-
-            iframe.style.opacity = '0';
-            loading.style.display = 'block';
-            errorDiv.style.display = 'none';
-
-            fetch(url)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.blob();
-                })
-                .then(blob => {
-                    const blobUrl = URL.createObjectURL(blob);
-
-                    iframe.src = blobUrl + "#toolbar=1&navpanes=1&scrollbar=1&view=100";
-
-                    iframe.onload = function() {
-                        loading.style.display = 'none';
-                        iframe.style.opacity = '1';
-
-                        if (typeof showMaterialToast === 'function') {
-                            showMaterialToast('Dokumen PDF berhasil dimuat.', 'success', 'Pratinjau');
-                        }
-                    };
-                })
-                .catch(error => {
-                    console.error('Error loading PDF:', error);
-                    loading.style.display = 'none';
-                    errorDiv.style.display = 'block';
-
-                    if (typeof showMaterialToast === 'function') {
-                        showMaterialToast('Gagal menampilkan dokumen PDF.', 'danger', 'Error');
-                    }
-                });
-        }
     </script>
 @endpush

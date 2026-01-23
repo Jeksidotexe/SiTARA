@@ -50,7 +50,7 @@ class ResetPassword extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.reset-password', // Menunjuk ke views/emails/reset-password.blade.php
+            view: 'emails.reset-password',
             with: [
                 'nama_user' => $this->user->nama,
                 'url_reset' => route('password.reset', [

@@ -585,14 +585,20 @@ window.onload = function() {
 };
 
 // Toggle Sidenav
-const iconNavbarSidenav = document.getElementById('iconNavbarSidenav');
+const iconNavbarSidenavDesktop = document.getElementById('iconNavbarSidenavDesktop');
+const iconNavbarSidenavMobile = document.getElementById('iconNavbarSidenavMobile');
 const iconSidenav = document.getElementById('iconSidenav');
 const sidenav = document.getElementById('sidenav-main');
 let body = document.getElementsByTagName('body')[0];
 let className = 'g-sidenav-pinned';
+let classNameHidden = 'g-sidenav-hidden';
 
-if (iconNavbarSidenav) {
-  iconNavbarSidenav.addEventListener("click", toggleSidenav);
+if (iconNavbarSidenavDesktop) {
+  iconNavbarSidenavDesktop.addEventListener("click", toggleSidenav);
+}
+
+if (iconNavbarSidenavMobile) {
+  iconNavbarSidenavMobile.addEventListener("click", toggleSidenav);
 }
 
 if (iconSidenav) {
@@ -600,18 +606,29 @@ if (iconSidenav) {
 }
 
 function toggleSidenav() {
-  if (body.classList.contains(className)) {
-    body.classList.remove(className);
-    setTimeout(function() {
-      sidenav.classList.remove('bg-white');
-    }, 100);
-    sidenav.classList.remove('bg-transparent');
-
+  if (window.innerWidth < 1200) {
+    if (body.classList.contains(className)) {
+      body.classList.remove(className);
+      setTimeout(function() {
+        sidenav.classList.remove('bg-white');
+      }, 100);
+      sidenav.classList.remove('bg-transparent');
+    } else {
+      body.classList.add(className);
+      sidenav.classList.add('bg-white');
+      sidenav.classList.remove('bg-transparent');
+      if (iconSidenav) {
+        iconSidenav.classList.remove('d-none');
+      }
+    }
   } else {
-    body.classList.add(className);
-    sidenav.classList.add('bg-white');
-    sidenav.classList.remove('bg-transparent');
-    iconSidenav.classList.remove('d-none');
+    if (body.classList.contains(classNameHidden)) {
+      body.classList.remove(classNameHidden);
+      body.classList.add(className);
+    } else {
+      body.classList.add(classNameHidden);
+      body.classList.remove(className);
+    }
   }
 }
 

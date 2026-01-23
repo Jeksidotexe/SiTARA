@@ -430,7 +430,18 @@
             menubar: true,
             statusbar: true,
             min_height: 500,
-            autoresize_bottom_margin: 20
+            autoresize_bottom_margin: 20,
+            content_style: `
+                ul, ol {
+                margin-left: 10px !important;
+                padding-left: 0 !important;
+                }
+                li {
+                margin-left: 10px !important;
+                padding-left: 0 !important;
+                list-style-position: inside !important;
+                }
+            `
         });
         document.addEventListener('DOMContentLoaded', function() {
             let currentStep = 1;

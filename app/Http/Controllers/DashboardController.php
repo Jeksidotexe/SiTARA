@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\LaporanKejadianMenonjol;
+use App\Models\LaporanLain;
 use App\Models\LaporanPelanggaranKampanye;
 use App\Models\LaporanPenguatanIdeologi;
 use Carbon\Carbon;
@@ -25,6 +26,7 @@ class DashboardController extends Controller
             LaporanKejadianMenonjol::class,
             LaporanPelanggaranKampanye::class,
             LaporanPenguatanIdeologi::class,
+            LaporanLain::class
         ];
 
         // --- DASHBOARD ADMIN ---

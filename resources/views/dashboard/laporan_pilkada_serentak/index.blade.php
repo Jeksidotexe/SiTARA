@@ -50,6 +50,7 @@
                 scrollX: true,
                 processing: true,
                 serverSide: true,
+                order: [[2, 'desc']],
                 ajax: '{{ route('laporan_pilkada_serentak.data') }}',
                 columns: [{
                         data: 'DT_RowIndex',

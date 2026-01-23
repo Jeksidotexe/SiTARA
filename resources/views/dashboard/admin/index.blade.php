@@ -227,6 +227,22 @@
             z-index: 1;
         }
     </style>
+    <style>
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(244, 67, 54, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0); }
+        }
+
+        .pulse-animation.bg-gradient-danger {
+            animation: pulse-red 2s infinite;
+        }
+
+        .tooltip-inner {
+            font-family: "Inter", sans-serif;
+            font-size: 0.75rem;
+        }
+    </style>
 @endpush
 
 @section('content')
@@ -675,10 +691,63 @@
                             map.setView(defaultCenter, defaultZoom);
                         }
 
+                        let countAman = 0;
+                        let countSiaga = 0;
+                        let countBahaya = 0;
+
+                        data.forEach(item => {
+                            if (item.status_wilayah === 'Aman') countAman++;
+                            else if (item.status_wilayah === 'Siaga') countSiaga++;
+                            else if (item.status_wilayah === 'Bahaya') countBahaya++;
+                        });
+
+                        // 2. Update Badge UI
                         if (mapStatusBadge) {
-                            mapStatusBadge.innerHTML =
-                                '<i class="fas fa-check-circle me-1"></i> Real-time';
-                            mapStatusBadge.className = 'badge badge-sm bg-gradient-success';
+                            // Reset kelas animasi agar tidak menumpuk
+                            mapStatusBadge.classList.remove('pulse-animation');
+
+                            // -- KONDISI BAHAYA (Dominan) --
+                            if (countBahaya >= countSiaga && countBahaya >= countAman && countBahaya > 0) {
+                                mapStatusBadge.innerHTML =
+                                    '<i class="fas fa-exclamation-circle me-1"></i> Situasi Bahaya';
+                                mapStatusBadge.className = 'badge badge-sm bg-gradient-danger shadow-danger';
+
+                                // Tooltip: Info detail saat di-hover
+                                mapStatusBadge.title = `Terdapat ${countBahaya} wilayah dalam status Bahaya`;
+
+                                // Efek Visual: Berdenyut
+                                mapStatusBadge.classList.add('pulse-animation');
+                            }
+                            // -- KONDISI SIAGA (Dominan) --
+                            else if (countSiaga >= countAman && countSiaga > countBahaya) {
+                                mapStatusBadge.innerHTML =
+                                    '<i class="fas fa-exclamation-triangle me-1"></i> Situasi Siaga';
+                                mapStatusBadge.className = 'badge badge-sm bg-gradient-warning shadow-warning';
+
+                                // Tooltip
+                                mapStatusBadge.title = `Terdapat ${countSiaga} wilayah dalam status Siaga`;
+                            }
+                            // -- KONDISI AMAN / KONDUSIF (Dominan) --
+                            else {
+                                mapStatusBadge.innerHTML =
+                                    '<i class="fas fa-check-circle me-1"></i> Situasi Kondusif';
+                                mapStatusBadge.className = 'badge badge-sm bg-gradient-success';
+
+                                // Tooltip
+                                mapStatusBadge.title = `Seluruh wilayah terpantau aman (${countAman} wilayah)`;
+                            }
+
+                            // Re-inisialisasi Tooltip Bootstrap agar title muncul cantik
+                            mapStatusBadge.setAttribute('data-bs-toggle', 'tooltip');
+                            try {
+                                var tooltipTriggerList = [].slice.call(document.querySelectorAll(
+                                    '[data-bs-toggle="tooltip"]'));
+                                tooltipTriggerList.map(function(tooltipTriggerEl) {
+                                    return new bootstrap.Tooltip(tooltipTriggerEl);
+                                });
+                            } catch (e) {
+                                // Abaikan jika bootstrap tooltip belum load
+                            }
                         }
                     })
                     .catch(error => {

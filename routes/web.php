@@ -17,6 +17,7 @@ use App\Http\Controllers\LaporanPilkadaSerentakController;
 use App\Http\Controllers\LaporanKejadianMenonjolController;
 use App\Http\Controllers\LaporanPenguatanIdeologiController;
 use App\Http\Controllers\LaporanPelanggaranKampanyeController;
+use App\Http\Controllers\LaporanLainController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -53,28 +54,28 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('/wilayah/tindak-lanjut', [WilayahController::class, 'tindakLanjut'])
         ->name('wilayah.tindakLanjut');
+    Route::get('/wilayah/{wilayah}', [WilayahController::class, 'show'])
+        ->name('wilayah.show')
+        ->where('wilayah', '[0-9]+');
 
     // --- Rute Admin ---
     Route::middleware(['role:admin'])->group(function () {
         Route::get('/pengguna/data', [PenggunaController::class, 'data'])->name('pengguna.data');
         Route::resource('/pengguna', PenggunaController::class);
         Route::get('/wilayah/data', [WilayahController::class, 'data'])->name('wilayah.data');
-        Route::resource('/wilayah', WilayahController::class);
+        Route::resource('/wilayah', WilayahController::class)->except(['show']);
         Route::get('/dashboard/map-data', [DashboardController::class, 'getMapData'])->name('dashboard.mapData');
 
         // Daftar Laporan Bulanan
         Route::prefix('dashboard/laporan-bulanan')->name('laporan-bulanan.')->group(function () {
-            Route::get('/', [DaftarLaporanBulananController::class, 'index'])->name('index'); // Daftar Wilayah
-            Route::get('/{wilayah}', [DaftarLaporanBulananController::class, 'showMonths'])->name('months'); // Daftar Bulan per Wilayah
-            Route::get('/{wilayah}/{month}', [DaftarLaporanBulananController::class, 'showReports'])->name('reports'); // Halaman Tabel Laporan
-            Route::get('/{wilayah}/{month}/data', [DaftarLaporanBulananController::class, 'data'])->name('data'); // Endpoint AJAX DataTables
+            Route::get('/', [DaftarLaporanBulananController::class, 'index'])->name('index');
+            Route::get('/{wilayah}', [DaftarLaporanBulananController::class, 'showMonths'])->name('months');
+            Route::get('/{wilayah}/{month}', [DaftarLaporanBulananController::class, 'showReports'])->name('reports');
+            Route::get('/{wilayah}/{month}/data', [DaftarLaporanBulananController::class, 'data'])->name('data');
         });
         // --- REKAPITULASI LAPORAN ---
         Route::prefix('dashboard/rekapitulasi')->name('rekapitulasi.')->group(function () {
-            // Arahkan kedua menu ke halaman filter yang sama
             Route::get('/laporan', [RekapitulasiController::class, 'index'])->name('laporan');
-
-            // Rute baru untuk memproses cetak PDF
             Route::get('/cetak', [RekapitulasiController::class, 'cetak'])->name('cetak');
         });
     });
@@ -96,6 +97,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('laporan_penguatan_ideologi/data', [LaporanPenguatanIdeologiController::class, 'data'])->name('laporan_penguatan_ideologi.data');
         Route::resource('laporan_penguatan_ideologi', LaporanPenguatanIdeologiController::class)->except(['show']);
 
+        Route::get('laporan_lain/data', [LaporanLainController::class, 'data'])->name('laporan_lain.data');
+        Route::resource('laporan_lain', LaporanLainController::class)->except(['show']);
+
         // --- RUTE PENGATURAN WILAYAH ---
         Route::get('/pengaturan-wilayah/show', [PengaturanWilayahController::class, 'show'])
             ->name('pengaturan-wilayah.show');
@@ -105,16 +109,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // --- Rute Pimpinan ---
     Route::middleware(['role:pimpinan'])->prefix('verifikasi')->name('verifikasi.')->group(function () {
-        // Halaman daftar laporan menunggu verifikasi
         Route::get('/pending', [VerificationController::class, 'pendingList'])->name('pending');
-        // Halaman daftar riwayat verifikasi
         Route::get('/history', [VerificationController::class, 'historyList'])->name('history');
 
-        // Aksi verifikasi (sudah ada)
         Route::post('/{reportType}/{id}/approve', [VerificationController::class, 'approve'])->name('approve');
         Route::post('/{reportType}/{id}/revisi', [VerificationController::class, 'requestRevision'])->name('requestRevision');
 
-        // Route DataTables untuk halaman pending & history (opsional)
         Route::get('/pending/data', [VerificationController::class, 'pendingData'])->name('pending.data');
         Route::get('/history/data', [VerificationController::class, 'historyData'])->name('history.data');
     });
@@ -125,6 +125,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('laporan_kejadian_menonjol/{laporan_kejadian_menonjol}', [LaporanKejadianMenonjolController::class, 'show'])->name('laporan_kejadian_menonjol.show');
     Route::get('laporan_pelanggaran_kampanye/{laporan_pelanggaran_kampanye}', [LaporanPelanggaranKampanyeController::class, 'show'])->name('laporan_pelanggaran_kampanye.show');
     Route::get('laporan_penguatan_ideologi/{laporan_penguatan_ideologi}', [LaporanPenguatanIdeologiController::class, 'show'])->name('laporan_penguatan_ideologi.show');
+    Route::get('laporan_lain/{laporan_lain}', [LaporanLainController::class, 'show'])->name('laporan_lain.show');
 
     Route::get('laporan_situasi_daerah/{id}/preview-pdf', [LaporanSituasiDaerahController::class, 'previewPdf'])
         ->name('laporan_situasi_daerah.previewPdf');
@@ -136,4 +137,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('laporan_pelanggaran_kampanye.previewPdf');
     Route::get('laporan_penguatan_ideologi/{id}/preview-pdf', [LaporanPenguatanIdeologiController::class, 'previewPdf'])
         ->name('laporan_penguatan_ideologi.previewPdf');
+    Route::get('laporan_lain/{id}/preview-pdf', [LaporanLainController::class, 'previewPdf'])
+        ->name('laporan_lain.previewPdf');
 });

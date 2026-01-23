@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id('id_wilayah');
             $table->string('nama_wilayah');
             $table->decimal('latitude', 10, 8);
-            $table->decimal('longitude', 10, 8);
+            $table->decimal('longitude', 11, 8);
             $table->string('kop_surat')->nullable();
             $table->string('tanda_tangan')->nullable();
             $table->enum('status_wilayah', ['Aman', 'Siaga', 'Bahaya'])->default('Aman');

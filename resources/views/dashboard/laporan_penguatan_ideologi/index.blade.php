@@ -50,6 +50,7 @@
                 scrollX: true,
                 processing: true,
                 serverSide: true,
+                order: [[2, 'desc']],
                 ajax: '{{ route('laporan_penguatan_ideologi.data') }}',
                 columns: [{
                         data: 'DT_RowIndex',

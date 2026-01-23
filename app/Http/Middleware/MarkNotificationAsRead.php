@@ -15,7 +15,7 @@ class MarkNotificationAsRead
         if ($request->has('mark_as_read')) {
             /** @var User|null $user */
             $user = Auth::user();
-            $notificationId = $request->query('mark_as_read'); // Ambil nilainya
+            $notificationId = $request->query('mark_as_read');
 
             if ($user && $notificationId) {
                 // Cari notifikasi HANYA milik user yang sedang login

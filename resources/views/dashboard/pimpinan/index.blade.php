@@ -34,7 +34,7 @@
                         @if (isset($countPending) && $countPending > 0)
                             <a href="{{ route('verifikasi.pending') }}"
                                 class="btn btn-sm btn-dark bg-gradient-dark mb-0 py-1 px-3">
-                                Lihat Semua Pending <i class="fas fa-arrow-circle-right ms-1"></i>
+                                Lihat Semua <i class="fas fa-arrow-circle-right ms-1"></i>
                             </a>
                         @endif
                     </div>
@@ -43,7 +43,7 @@
                     </p>
                 </div>
                 <div class="card-body px-0 pt-0 pb-2">
-                    <div class="table-responsive">
+                    <div class="table-responsive p-0 custom-scroll" style="max-height: 180px; overflow-y: auto;">
                         <table class="table align-items-center mb-0">
                             <tbody id="pimpinan-pending-list-tbody">
                                 @forelse ($laporanPending as $laporan)
@@ -181,8 +181,11 @@
                 <div class="card-header pb-0 pt-3 bg-transparent">
                     <h6 class="mb-0 font-weight-bold d-flex align-items-center">
                         <i class="material-symbols-rounded me-2 fs-5">bar_chart</i>
-                        Grafik Laporan Disetujui (Per Bulan {{ date('Y') }})
+                        Jumlah Laporan Per Bulan ( Tahun {{ date('Y') }})
                     </h6>
+                    <p class="text-sm text-muted mt-1 mb-0">
+                        Grafik ini menunjukkan total semua laporan setiap bulan.
+                    </p>
                 </div>
                 <div class="card-body">
                     <div class="chart">

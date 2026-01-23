@@ -27,7 +27,8 @@ class WilayahController extends Controller
      */
     public function data()
     {
-        $wilayah = Wilayah::withCount('users')->latest('id_wilayah');
+        $wilayah = Wilayah::withCount('users');
+                // ->latest('id_wilayah');
 
         return datatables()
             ->of($wilayah)
@@ -58,7 +59,7 @@ class WilayahController extends Controller
                 ';
             })
             ->rawColumns(['aksi', 'status_wilayah'])
-            ->make('true');
+            ->make(true);
     }
 
     /**

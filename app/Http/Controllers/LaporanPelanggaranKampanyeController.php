@@ -179,8 +179,8 @@ class LaporanPelanggaranKampanyeController extends Controller
         $user = Auth::user();
 
         // [PERBAIKAN] Mulai query builder
-        $query = LaporanPelanggaranKampanye::with('operator')
-            ->latest('id_laporan');
+        $query = LaporanPelanggaranKampanye::with('operator');
+            // ->latest('id_laporan');
 
         // [PERBAIKAN] Terapkan filter berdasarkan Role Operator
         // Route ini dilindungi oleh middleware 'role:operator' di web.php

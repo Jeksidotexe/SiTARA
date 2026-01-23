@@ -10,7 +10,7 @@
         </a>
     </div>
     <hr class="horizontal dark mt-0 mb-2">
-    <div class="collapse navbar-collapse w-auto " id="sidenav-collapse-main">
+    <div class="collapse navbar-collapse w-auto h-auto" id="sidenav-collapse-main">
         <ul class="navbar-nav">
 
             {{-- === MENU UMUM === --}}
@@ -32,7 +32,7 @@
                 @endphp
 
                 <li class="nav-item mt-3">
-                    <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Verifikasi
+                    <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder text-dark">Verifikasi
                         Laporan</h6>
                 </li>
                 <li class="nav-item {{ request()->routeIs('verifikasi.pending*') ? 'active' : '' }}">
@@ -62,13 +62,13 @@
             {{-- === MENU KHUSUS OPERATOR & ADMIN === --}}
             @if (in_array(Auth::user()->role, ['operator']))
                 <li class="nav-item mt-3">
-                    <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Manajemen Laporan</h6>
+                    <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder text-dark">Manajemen Laporan</h6>
                 </li>
                 <li class="nav-item {{ request()->routeIs('laporan_situasi_daerah.*') ? 'active' : '' }}">
                     <a class="nav-link {{ request()->routeIs('laporan_situasi_daerah.*') ? 'active bg-gradient-dark text-white' : 'text-dark' }}"
                         href="{{ route('laporan_situasi_daerah.index') }}">
                         <div class="text-center me-2 d-flex align-items-center justify-content-center">
-                            <i class="material-symbols-rounded opacity-5">assignment</i>
+                            <i class="material-symbols-rounded opacity-5">breaking_news</i>
                         </div>
                         <span class="nav-link-text text-wrap ms-1">Laporan Situasi Daerah</span>
                     </a>
@@ -77,7 +77,7 @@
                     <a class="nav-link {{ request()->routeIs('laporan_pilkada_serentak.*') ? 'active bg-gradient-dark text-white' : 'text-dark' }}"
                         href="{{ route('laporan_pilkada_serentak.index') }}">
                         <div class="text-center me-2 d-flex align-items-center justify-content-center">
-                            <i class="material-symbols-rounded opacity-5">assignment</i>
+                            <i class="material-symbols-rounded opacity-5">how_to_vote</i>
                         </div>
                         <span class="nav-link-text text-wrap ms-1">Laporan Harian Pilkada Serentak</span>
                     </a>
@@ -86,7 +86,7 @@
                     <a class="nav-link {{ request()->routeIs('laporan_kejadian_menonjol.*') ? 'active bg-gradient-dark text-white' : 'text-dark' }}"
                         href="{{ route('laporan_kejadian_menonjol.index') }}">
                         <div class="text-center me-2 d-flex align-items-center justify-content-center">
-                            <i class="material-symbols-rounded opacity-5">assignment</i>
+                            <i class="material-symbols-rounded opacity-5">report</i>
                         </div>
                         <span class="nav-link-text text-wrap ms-1">Laporan Harian Kejadian Menonjol</span>
                     </a>
@@ -95,7 +95,7 @@
                     <a class="nav-link {{ request()->routeIs('laporan_pelanggaran_kampanye.*') ? 'active bg-gradient-dark text-white' : 'text-dark' }}"
                         href="{{ route('laporan_pelanggaran_kampanye.index') }}">
                         <div class="text-center me-2 d-flex align-items-center justify-content-center">
-                            <i class="material-symbols-rounded opacity-5">assignment</i>
+                            <i class="material-symbols-rounded opacity-5">gavel</i>
                         </div>
                         <span class="nav-link-text text-wrap ms-1">Laporan Harian Pelanggaran Kampanye</span>
                     </a>
@@ -104,9 +104,18 @@
                     <a class="nav-link {{ request()->routeIs('laporan_penguatan_ideologi.*') ? 'active bg-gradient-dark text-white' : 'text-dark' }}"
                         href="{{ route('laporan_penguatan_ideologi.index') }}">
                         <div class="text-center me-2 d-flex align-items-center justify-content-center">
-                            <i class="material-symbols-rounded opacity-5">assignment</i>
+                            <i class="material-symbols-rounded opacity-5">school</i>
                         </div>
                         <span class="nav-link-text text-wrap ms-1">Laporan Penguatan Ideologi Pancasila dan Karakter</span>
+                    </a>
+                </li>
+                <li class="nav-item {{ request()->routeIs('laporan_lain.*') ? 'active' : '' }}">
+                    <a class="nav-link {{ request()->routeIs('laporan_lain.*') ? 'active bg-gradient-dark text-white' : 'text-dark' }}"
+                        href="{{ route('laporan_lain.index') }}">
+                        <div class="text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="material-symbols-rounded opacity-5">more_horiz</i>
+                        </div>
+                        <span class="nav-link-text text-wrap ms-1">Laporan Lain-Lain</span>
                     </a>
                 </li>
             @endif
@@ -115,7 +124,7 @@
             {{-- === MENU KHUSUS ADMIN === --}}
             @if (Auth::user()->role == 'admin')
                 <li class="nav-item mt-3">
-                    <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Data Master</h6>
+                    <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder text-dark">Data Master</h6>
                 </li>
                 <li class="nav-item {{ request()->routeIs('laporan-bulanan.*') ? 'active' : '' }}">
                     <a class="nav-link {{ request()->routeIs('laporan-bulanan.*') ? 'active bg-gradient-dark text-white' : 'text-dark' }}"
@@ -146,7 +155,7 @@
                     </a>
                 </li>
                 <li class="nav-item mt-3">
-                    <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Akun</h6>
+                    <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder text-dark">Akun</h6>
                 </li>
                 <li class="nav-item {{ request()->routeIs('pengguna.*') ? 'active' : '' }}">
                     <a class="nav-link {{ request()->routeIs('pengguna.*') ? 'active bg-gradient-dark text-white' : 'text-dark' }}"
@@ -160,7 +169,7 @@
             @endif
 
             <li class="nav-item mt-3">
-                <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Pengaturan</h6>
+                <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder text-dark">Pengaturan</h6>
             </li>
             <li class="nav-item {{ request()->routeIs('profil.edit') ? 'active' : '' }}">
                 <a class="nav-link {{ request()->routeIs('profil.edit') ? 'active bg-gradient-dark text-white' : 'text-dark' }}"

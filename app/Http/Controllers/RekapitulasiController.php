@@ -2,19 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\LaporanKejadianMenonjol;
-use App\Models\LaporanPelanggaranKampanye;
-use App\Models\LaporanPenguatanIdeologi;
-use App\Models\LaporanPilkadaSerentak;
-use App\Models\LaporanSituasiDaerah;
-use App\Models\Wilayah;
-use Illuminate\Http\Request;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
+use App\Models\Wilayah;
+use App\Models\LaporanLain;
+use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\App;
+use App\Models\LaporanSituasiDaerah;
+use Illuminate\Support\Facades\Auth;
+use App\Models\LaporanPilkadaSerentak;
+use App\Models\LaporanKejadianMenonjol;
+use App\Models\LaporanPenguatanIdeologi;
+use Illuminate\Support\Facades\Validator;
+use App\Models\LaporanPelanggaranKampanye;
 
 class RekapitulasiController extends Controller
 {
@@ -25,6 +26,7 @@ class RekapitulasiController extends Controller
         'kejadian_menonjol' => LaporanKejadianMenonjol::class,
         'pelanggaran_kampanye' => LaporanPelanggaranKampanye::class,
         'penguatan_ideologi' => LaporanPenguatanIdeologi::class,
+        'lain' => LaporanLain::class
     ];
     protected $reportTitles = [
         'situasi_daerah' => 'Laporan Situasi Daerah',
@@ -32,6 +34,7 @@ class RekapitulasiController extends Controller
         'kejadian_menonjol' => 'Laporan Kejadian Menonjol',
         'pelanggaran_kampanye' => 'Laporan Pelanggaran Kampanye',
         'penguatan_ideologi' => 'Laporan Penguatan Ideologi',
+        'lain' => 'Laporan Lain-Lain'
     ];
     protected $sectionTitles = [
         'a' => 'A. PENYELENGGARAAN PEMERINTAH DAERAH',
@@ -185,7 +188,7 @@ class RekapitulasiController extends Controller
      */
     private function getAvailableYears(): array
     {
-        $years = new \Illuminate\Support\Collection();
+        $years = new Collection();
         foreach ($this->reportModels as $model) {
             $years = $years->merge(
                 $model::selectRaw('YEAR(tanggal_laporan) as year')

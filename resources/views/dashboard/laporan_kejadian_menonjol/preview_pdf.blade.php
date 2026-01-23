@@ -124,13 +124,13 @@
 
         .image-gallery {
             margin-top: 0;
-            page-break-inside: avoid;
+            /* page-break-inside: avoid; */
             padding-left: 0;
         }
 
         .image-gallery img {
-            width: 200px;
-            height: 150px;
+            width: 150px;
+            height: 100px;
             object-fit: contain;
             margin: 5px;
             border: 1px solid #ccc;
@@ -191,7 +191,7 @@
                     </div>
                 @endif
 
-                <h4>II. LAPORAN PERMASALAHAN STRATEGIS:</h4>
+                <h4>II. LAPORAN PERMASALAHAN STRATEGIS</h4>
 
                 @foreach ($sectionKeys as $key)
                     @php

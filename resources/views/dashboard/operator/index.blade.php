@@ -93,7 +93,7 @@
                 <div class="card-header pb-0 pt-3 bg-transparent">
                     <h6 class="mb-0 font-weight-bold d-flex align-items-center">
                         <i class="material-symbols-rounded text-dark me-2 fs-5">bar_chart</i>
-                        Jumlah Laporan per Bulan ({{ now()->year }})
+                        Jumlah Laporan per Bulan ( Tahun {{ now()->year }})
                     </h6>
                     <p class="text-sm text-muted mt-1 mb-0">
                         Grafik total laporan yang Anda buat setiap bulan.
@@ -186,7 +186,7 @@
                                         <div class="d-flex align-items-center text-xs text-muted mb-1">
                                             <i class="material-symbols-rounded text-xs me-1 text-warning">warning</i>
                                             <span class="font-weight-bold me-1">Catatan:</span>
-                                            {{ Str::limit($laporan->catatan ?? 'Harap perbaiki data.', 30) }}
+                                            {{ Str::limit($laporan->catatan ?? 'Harap perbaiki data.', 50) }}
                                         </div>
 
                                         <span class="text-xs text-secondary">
@@ -263,7 +263,8 @@
                                     <div class="timeline-content">
                                         <h6 class="text-dark text-sm font-weight-bold mb-0">{{ $laporan->judul }}</h6>
                                         <p class="text-secondary font-weight-bold text-xs mt-1 mb-0">
-                                            {{ $laporan->verified_at?->format('d M Y, H:i') }}
+                                            {{ $laporan->verified_at?->translatedFormat('d F Y,') }} pukul
+                                            {{ $laporan->verified_at?->translatedFormat('H.i') }} WIB
                                         </p>
                                         <p class="text-sm mt-2 mb-2">
                                             Disetujui oleh <span
@@ -406,29 +407,23 @@
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Cek apakah moment.js tersedia (sudah ada di master.blade.php)
             if (typeof moment !== 'undefined') {
-                // Set locale ke Indonesia
                 moment.locale('id');
 
                 function updateTime() {
                     const now = moment();
 
-                    // Update Jam (Format: 14:30:59)
                     const timeString = now.format('HH:mm:ss');
                     const clockElement = document.getElementById('realtime-clock');
                     if (clockElement) clockElement.innerText = timeString;
 
-                    // Update Tanggal (Format: Senin, 25 November 2024)
                     const dateString = now.format('dddd, D MMMM YYYY');
                     const dateElement = document.getElementById('realtime-date');
                     if (dateElement) dateElement.innerText = dateString;
                 }
 
-                // Jalankan fungsi update setiap 1 detik
                 setInterval(updateTime, 1000);
 
-                // Jalankan segera saat load agar tidak ada delay tampilan
                 updateTime();
             } else {
                 console.error('Moment.js tidak ditemukan. Pastikan sudah di-load di master layout.');

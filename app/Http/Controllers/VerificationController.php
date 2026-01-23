@@ -10,10 +10,10 @@ use Illuminate\Support\Facades\Log;
 use App\Events\LaporanStatusUpdated;
 use App\Models\LaporanSituasiDaerah;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Cache;
 use App\Models\LaporanPilkadaSerentak;
 use App\Models\LaporanKejadianMenonjol;
+use App\Models\LaporanLain;
 use App\Models\LaporanPenguatanIdeologi;
 use Yajra\DataTables\Facades\DataTables;
 use App\Models\LaporanPelanggaranKampanye;
@@ -55,21 +55,22 @@ class VerificationController extends Controller
             'route_base' => 'laporan_penguatan_ideologi',
             'title' => 'Laporan Penguatan Ideologi Pancasila dan Karakter'
         ],
+        'laporan-lain' => [
+            'class' => LaporanLain::class,
+            'route_base' => 'laporan_lain',
+            'title' => 'Laporan Lain-Lain'
+        ],
     ];
 
-    /**
-     * Menyetujui sebuah laporan.
-     *
-     * @param string $reportType
-     * @param int $id ID laporan
-     * @return RedirectResponse
-     */
-    public function approve(Request $request, string $reportType, int $id): RedirectResponse
+    public function approve(Request $request, string $reportType, int $id)
     {
         $report = $this->findReportOrFail($reportType, $id);
         $reportConfig = $this->verifiableModels[$reportType] ?? null;
 
         if (Auth::user()->role !== 'pimpinan') {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Anda tidak memiliki izin.'], 403);
+            }
             abort(403, 'Anda tidak memiliki izin untuk melakukan tindakan ini.');
         }
 
@@ -107,66 +108,69 @@ class VerificationController extends Controller
             } catch (\Exception $e) {
                 Log::error('Gagal mengirim notifikasi: ' . $e->getMessage());
             }
+
             $newStatus = $request->input('status_wilayah_baru');
             if ($newStatus) {
                 try {
                     $report->load('operator.wilayah');
-
-                    if (!$report->operator) {
-                        return redirect()->back()->with('error', 'Update Gagal: Relasi operator tidak ditemukan.');
-                    }
-
-                    if (!$report->operator->wilayah) {
-                        return redirect()->back()->with('error', 'Update Gagal: Operator tidak memiliki data wilayah.');
+                    if (!$report->operator || !$report->operator->wilayah) {
+                        if ($request->ajax()) {
+                            return response()->json(['success' => false, 'message' => 'Update Gagal: Data wilayah operator tidak ditemukan.'], 400);
+                        }
+                        return redirect()->back()->with('error', 'Update Gagal: Data wilayah tidak ditemukan.');
                     }
 
                     $wilayah = $report->operator->wilayah;
-
                     $wilayah->update(['status_wilayah' => $newStatus]);
-
                     WilayahUpdated::dispatch($wilayah, 'updated');
-
-                    $successMessage = 'Laporan disetujui DAN status wilayah berhasil diperbarui.';
                 } catch (\Exception $e) {
                     Log::error('Gagal update status wilayah: ' . $e->getMessage());
-                    return redirect()->back()->with('error', 'Update Gagal: Terjadi error. Cek log.');
+                    if ($request->ajax()) {
+                        return response()->json(['success' => false, 'message' => 'Update Gagal: Terjadi error server.'], 500);
+                    }
+                    return redirect()->back()->with('error', 'Update Gagal: Terjadi error server.');
                 }
             }
 
+            // Bersihkan Cache Pimpinan
             try {
                 if (Auth::user()->role == 'pimpinan' && Auth::user()->id_wilayah) {
                     $cacheKey = 'pending_count_pimpinan_' . Auth::user()->id_wilayah;
                     Cache::forget($cacheKey);
                 }
             } catch (\Exception $e) {
-                Log::error('Gagal membersihkan cache pending count: ' . $e->getMessage());
+                Log::error('Gagal membersihkan cache: ' . $e->getMessage());
             }
 
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Laporan berhasil disetujui.',
+                    'report' => $report
+                ]);
+            }
             return redirect()->back()->with('success', 'Laporan berhasil disetujui.');
         }
 
+        if ($request->ajax()) {
+            return response()->json(['success' => false, 'message' => 'Gagal menyetujui laporan.'], 400);
+        }
         return redirect()->back()->with('error', 'Gagal menyetujui laporan.');
     }
 
-    /**
-     * Meminta revisi untuk sebuah laporan.
-     *
-     * @param Request $request
-     * @param string $reportType Tipe laporan
-     * @param int $id ID laporan
-     * @return RedirectResponse
-     */
-    public function requestRevision(Request $request, string $reportType, int $id): RedirectResponse
+    public function requestRevision(Request $request, string $reportType, int $id)
     {
         $request->validate([
             'catatan' => 'required|string|max:5000',
         ]);
 
         $report = $this->findReportOrFail($reportType, $id);
-
         $reportConfig = $this->verifiableModels[$reportType] ?? null;
 
         if (Auth::user()->role !== 'pimpinan') {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Anda tidak memiliki izin.'], 403);
+            }
             abort(403, 'Anda tidak memiliki izin untuk melakukan tindakan ini.');
         }
 
@@ -196,12 +200,22 @@ class VerificationController extends Controller
                     Cache::forget($cacheKey);
                 }
             } catch (\Exception $e) {
-                Log::error('Gagal membersihkan cache pending count: ' . $e->getMessage());
+                Log::error('Gagal membersihkan cache: ' . $e->getMessage());
             }
 
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Permintaan revisi berhasil dikirim.',
+                    'report' => $report
+                ]);
+            }
             return redirect()->back()->with('success', 'Permintaan revisi berhasil dikirim.');
         }
 
+        if ($request->ajax()) {
+            return response()->json(['success' => false, 'message' => 'Gagal meminta revisi laporan.'], 400);
+        }
         return redirect()->back()->with('error', 'Gagal meminta revisi laporan.');
     }
 

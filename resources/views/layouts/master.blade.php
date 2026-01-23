@@ -81,7 +81,7 @@
     </head>
 
     <body
-        class="g-sidenav-show  bg-gray-100 @if (Auth::check()) @if (Auth::user()->role == 'admin') dashboard-admin @endif
+        class="g-sidenav-show bg-gray-100 @if (Auth::check()) @if (Auth::user()->role == 'admin') dashboard-admin @endif
             @if (Auth::user()->role == 'operator') dashboard-operator @endif
             @if (Auth::user()->role == 'pimpinan') dashboard-pimpinan @endif
         @endif">
@@ -251,9 +251,23 @@
                                         style="display: none; padding: 0.75rem 1.25rem; font-size: 0.875rem;">
                                     </div>
 
-                                    <p class="text-sm">Status wilayah ini perlu ditinjau ulang. Anda dapat
-                                        mengabaikannya (akan diingatkan lagi 24 jam) atau mengubah statusnya
-                                        sekarang.</p>
+                                    <div class="mb-4">
+                                        <p class="text-sm text-secondary text-center mb-3">
+                                            Status wilayah ini perlu ditinjau ulang. Anda dapat mengabaikannya (akan
+                                            diingatkan lagi 24 jam) atau mengubah statusnya sekarang.
+                                        </p>
+
+                                        <h5 class="text-dark text-center font-weight-bold mb-2"
+                                            id="tindakLanjut_nama_display">
+                                            Memuat...
+                                        </h5>
+
+                                        <div class="d-flex justify-content-center align-items-center gap-2">
+                                            <span class="text-sm text-secondary">Status Saat Ini:</span>
+                                            <span class="badge badge-sm" id="tindakLanjut_status_display">Memuat...</span>
+                                        </div>
+                                    </div>
+
 
                                     <div class="form-group mb-0">
                                         <label for="tindakLanjut_status_wilayah" class="form-label">Ubah Status
@@ -293,6 +307,7 @@
         <script src="{{ asset('master') }}/assets/js/plugins/perfect-scrollbar.min.js"></script>
         <script src="{{ asset('master') }}/assets/js/plugins/smooth-scrollbar.min.js"></script>
         <script src="{{ asset('master') }}/assets/js/plugins/chartjs.min.js"></script>
+        <script src="{{ asset('master') }}/assets/js/material-dashboard.js"></script>
 
         <!-- Leaflet JS -->
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
@@ -898,6 +913,8 @@
                             const submitBtn = $('#btnSubmitTindakLanjut');
                             const hiddenWilayahId = $('#tindakLanjut_id_wilayah');
                             const statusSelect = $('#tindakLanjut_status_wilayah');
+                            const namaDisplay = $('#tindakLanjut_nama_display');
+                            const statusDisplay = $('#tindakLanjut_status_display');
 
                             const btnAbaikan = $('#btnAbaikanTindakLanjut');
 
@@ -916,12 +933,57 @@
 
                                     if (wilayahId && notifId) {
                                         errorContainer.hide().html('');
-                                        submitBtn.prop('disabled', false).html(
-                                            '<i class="fa fa-save me-1"></i> Simpan Perubahan');
+                                        submitBtn.prop('disabled', true);
+
+                                        namaDisplay.text('Memuat data...');
+                                        statusDisplay.text('Memuat...');
+                                        statusDisplay.removeClass('text-success text-warning text-danger text-secondary');
+
                                         hiddenWilayahId.val(wilayahId);
                                         formTindakLanjut.data('notification-id', notifId);
-                                        statusSelect.val('Aman');
+
                                         modalTindakLanjut.show();
+
+                                        $.ajax({
+                                            url: "{{ url('/wilayah') }}/" +
+                                                wilayahId,
+                                            type: "GET",
+                                            success: function(data) {
+                                                namaDisplay.text(data.nama_wilayah);
+
+                                                const status = data.status_wilayah;
+                                                statusDisplay.text(status || 'Belum Diatur');
+
+                                                statusDisplay.removeClass(
+                                                    'bg-gradient-success bg-gradient-warning bg-gradient-danger bg-gradient-secondary'
+                                                );
+
+                                                if (status === 'Aman') {
+                                                    statusDisplay.addClass('bg-gradient-success');
+                                                } else if (status === 'Siaga') {
+                                                    statusDisplay.addClass('bg-gradient-warning');
+                                                } else if (status === 'Bahaya') {
+                                                    statusDisplay.addClass('bg-gradient-danger');
+                                                } else {
+                                                    statusDisplay.addClass(
+                                                        'bg-gradient-secondary');
+                                                }
+
+                                                if (['Aman', 'Siaga', 'Bahaya'].includes(status)) {
+                                                    statusSelect.val(status);
+                                                } else {
+                                                    statusSelect.val('Aman');
+                                                }
+
+                                                submitBtn.prop('disabled', false);
+                                            },
+                                            error: function(xhr) {
+                                                namaDisplay.text('Gagal memuat data');
+                                                statusDisplay.text('-');
+                                                showMaterialToast('Gagal mengambil data wilayah.', 'danger');
+                                                console.error(xhr);
+                                            }
+                                        });
                                     }
                                 }
                             });

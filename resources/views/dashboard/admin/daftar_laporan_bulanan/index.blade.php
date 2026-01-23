@@ -46,8 +46,8 @@
                     <div class="col-md-6 col-sm-12">
                         <div id="search-wilayah-form">
                             <label for="wilayah-search" class="form-label font-weight-bold ms-0">Cari Wilayah</label>
-                            <input type="text" class="form-control py-2 px-3" style="height: 38px; background-color:#fff;" id="wilayah-search"
-                                placeholder="Ketik nama wilayah...">
+                            <input type="text" class="form-control py-2 px-3" style="height: 38px; background-color:#fff;"
+                                id="wilayah-search" placeholder="Ketik nama wilayah...">
                         </div>
                     </div>
                     <div class="col-md-6 col-sm-12">
@@ -72,38 +72,40 @@
         @forelse ($wilayahs as $wilayah)
             <div class="col-xl-3 col-md-4 col-sm-6 mb-5 wilayah-card-wrapper"
                 data-nama-wilayah="{{ $wilayah->nama_wilayah }}">
-                <a href="{{ route('laporan-bulanan.months', $wilayah->id_wilayah) }}?year={{ $selectedYear }}"
-                    class="text-decoration-none wilayah-card">
-                    <div class="card">
-                        <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
-                            <div class="bg-gradient-dark shadow-dark border-radius-lg py-3 pe-1 text-center">
-                                <h6 class="font-weight-bolder mb-1 mt-2 text-white">
-                                    {{ Str::limit($wilayah->nama_wilayah, 25) }}
-                                </h6>
+
+                <div class="card">
+                    <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                        <div class="bg-gradient-dark shadow-dark border-radius-lg py-3 pe-1 text-center">
+                            <h6 class="font-weight-bolder mb-1 mt-2 text-white">
+                                {{ Str::limit($wilayah->nama_wilayah, 25) }}
+                            </h6>
+                        </div>
+                    </div>
+                    <div class="card-body text-center py-3">
+                        <p class="text-xs text-muted mb-1">Progress Laporan</p>
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar progress-bar-striped bg-gradient-secondary" role="progressbar"
+                                style="width: {{ $wilayah->progress_percentage }}%;"
+                                aria-valuenow="{{ $wilayah->progress_percentage }}" aria-valuemin="0" aria-valuemax="100">
                             </div>
                         </div>
-                        <div class="card-body text-center py-3">
-                            <p class="text-xs text-muted mb-1">Progress Laporan</p>
-                            <div class="progress" style="height: 20px;">
-                                <div class="progress-bar progress-bar-striped bg-gradient-dark" role="progressbar"
-                                    style="width: {{ $wilayah->progress_percentage }}%;"
-                                    aria-valuenow="{{ $wilayah->progress_percentage }}" aria-valuemin="0"
-                                    aria-valuemax="100"></div>
-                            </div>
-                            <div class="progress-info-container mt-1">
-                                <span class="progress-percentage">{{ $wilayah->progress_percentage }}%</span>
-                                <span class="progress-count">{{ $wilayah->report_count }} /
-                                    {{ $wilayah->target_days }} Laporan</span>
-                            </div>
-                            <hr class="dark horizontal my-2">
+                        <div class="progress-info-container mt-1">
+                            <span class="progress-percentage">{{ $wilayah->progress_percentage }}%</span>
+                            <span class="progress-count">{{ $wilayah->report_count }} /
+                                {{ $wilayah->target_days }} Laporan</span>
+                        </div>
+                        <hr class="dark horizontal my-2">
+                        <a href="{{ route('laporan-bulanan.months', $wilayah->id_wilayah) }}?year={{ $selectedYear }}"
+                            class="text-decoration-none wilayah-card">
                             <p class="text-xs text-muted mb-0 d-flex align-items-center justify-content-center">
                                 <i class="material-symbols-rounded opacity-6 me-1"
                                     style="font-size: 1rem;">arrow_forward</i>
                                 Lihat Laporan
                             </p>
-                        </div>
+                        </a>
                     </div>
-                </a>
+                </div>
+
             </div>
         @empty
             <div class="col-12">
@@ -117,6 +119,7 @@
 
         <div class="col-12" id="search-no-results" style="display: none;">
             <div class="alert alert-secondary text-white text-center" role="alert">
+                <i class="fas fa-search me-1"></i>
                 <strong>Info!</strong> Wilayah dengan nama tersebut tidak ditemukan.
             </div>
         </div>
@@ -128,33 +131,93 @@
         $(document).ready(function() {
             $('#year-select').select2({
                 theme: 'bootstrap-5',
-                // minimumResultsForSearch: Infinity
             });
 
             $('#year-select').on('change.select2', function(e) {
-                $('#year-filter-form').submit();
+                let selectedYear = $(this).val();
+
+                let loadingContent = `
+                    <div class="d-flex align-items-center text-dark">
+                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        <span>Menyiapkan data tahun ${selectedYear}...</span>
+                    </div>
+                `;
+
+                if (typeof showMaterialToast === 'function') {
+                    showMaterialToast(loadingContent, 'info', 'Memuat Data', 'Sekarang', 'hourglass_top');
+                }
+
+                setTimeout(function() {
+                    $('#year-filter-form').submit();
+                }, 700);
             });
+
+            let searchTimeout;
 
             $('#wilayah-search').on('keyup', function() {
                 let query = $(this).val().toLowerCase().trim();
-                let visibleCount = 0;
 
-                $('.wilayah-card-wrapper').each(function() {
-                    let namaWilayah = $(this).data('nama-wilayah').toLowerCase();
+                clearTimeout(searchTimeout);
 
-                    if (namaWilayah.includes(query)) {
-                        $(this).show();
-                        visibleCount++;
-                    } else {
-                        $(this).hide();
-                    }
-                });
-
-                if (visibleCount === 0 && $('.wilayah-card-wrapper').length > 0) {
-                    $('#search-no-results').show();
-                } else {
+                if (query === '') {
+                    $('.wilayah-card-wrapper').show();
                     $('#search-no-results').hide();
+
+                    const toastEl = document.getElementById('materialToast');
+                    if (toastEl) {
+                        const toastInstance = bootstrap.Toast.getInstance(toastEl);
+                        if (toastInstance) toastInstance.hide();
+                    }
+                    return;
                 }
+
+                searchTimeout = setTimeout(function() {
+
+                    let searchLoadingContent = `
+                        <div class="d-flex align-items-center text-dark">
+                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            <span>Mencari "${query}"...</span>
+                        </div>
+                    `;
+
+                    if (typeof showMaterialToast === 'function') {
+                        showMaterialToast(searchLoadingContent, 'info', 'Proses', 'Sekarang',
+                            'search');
+                    }
+
+                    setTimeout(function() {
+                        let visibleCount = 0;
+
+                        $('.wilayah-card-wrapper').each(function() {
+                            let namaWilayah = $(this).data('nama-wilayah')
+                                .toLowerCase();
+
+                            if (namaWilayah.includes(query)) {
+                                $(this).fadeIn(200);
+                                visibleCount++;
+                            } else {
+                                $(this).hide();
+                            }
+                        });
+
+                        if (visibleCount === 0 && $('.wilayah-card-wrapper').length > 0) {
+                            $('#search-no-results').fadeIn();
+                        } else {
+                            $('#search-no-results').hide();
+                        }
+
+                        const toastEl = document.getElementById('materialToast');
+                        if (toastEl) {
+                            const toastInstance = bootstrap.Toast.getInstance(toastEl);
+
+                            if (toastInstance) {
+                                toastInstance.hide();
+                            }
+                        }
+
+                    }, 400);
+
+                }, 300);
             });
         });
     </script>
