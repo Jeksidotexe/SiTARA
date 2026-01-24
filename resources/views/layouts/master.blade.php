@@ -667,11 +667,15 @@
 
             document.addEventListener('DOMContentLoaded', function() {
                 @if (session('success'))
-                    showMaterialToast("{{ session('success') }}", 'success');
+                    showMaterialToast({!! json_encode(session('success')) !!}, 'success');
                 @endif
 
                 @if (session('error'))
-                    showMaterialToast("{{ session('error') }}", 'danger');
+                    showMaterialToast({!! json_encode(session('error')) !!}, 'danger');
+                @endif
+
+                @if ($errors->any())
+                    showMaterialToast({!! json_encode($errors->first()) !!}, 'danger', 'Error');
                 @endif
 
                 @if ($errors->any())
@@ -1090,6 +1094,31 @@
                         window.Echo.private(`App.Models.User.${userId}`)
                             .notification((notification) => {
                                 console.log('[Reverb] Menerima Notifikasi:', notification);
+
+                                if (notification.type === 'App\\Notifications\\NotifikasiBackup') {
+                                    // Tentukan warna icon/toast berdasarkan status yang dikirim dari NotifikasiBackup.php
+                                    let toastType = 'info';
+                                    let toastTitle = 'Backup Database';
+
+                                    if (notification.status === 'success') {
+                                        toastType = 'success';
+                                        toastTitle = 'Backup Berhasil';
+                                    } else if (notification.status === 'error') {
+                                        toastType = 'danger';
+                                        toastTitle = 'Backup Gagal';
+                                    }
+
+                                    if (typeof showMaterialToast === 'function') {
+                                        showMaterialToast(notification.message, toastType, toastTitle);
+                                    }
+
+                                    // Opsional: Reload halaman otomatis jika user sedang di halaman backup
+                                    if (window.location.href.includes('backup')) {
+                                        setTimeout(() => {
+                                            window.location.reload();
+                                        }, 2000);
+                                    }
+                                }
 
                                 if (typeof showMaterialToast === 'function') {
                                     showMaterialToast(notification.message, 'info', 'Notifikasi Baru');

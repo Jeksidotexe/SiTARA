@@ -1,11 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\BackupController;
 use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\WilayahController;
 use App\Http\Controllers\PenggunaController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LaporanLainController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\RekapitulasiController;
 use App\Http\Controllers\VerificationController;
@@ -17,7 +20,6 @@ use App\Http\Controllers\LaporanPilkadaSerentakController;
 use App\Http\Controllers\LaporanKejadianMenonjolController;
 use App\Http\Controllers\LaporanPenguatanIdeologiController;
 use App\Http\Controllers\LaporanPelanggaranKampanyeController;
-use App\Http\Controllers\LaporanLainController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -65,6 +67,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/wilayah/data', [WilayahController::class, 'data'])->name('wilayah.data');
         Route::resource('/wilayah', WilayahController::class)->except(['show']);
         Route::get('/dashboard/map-data', [DashboardController::class, 'getMapData'])->name('dashboard.mapData');
+
+        Route::prefix('backup')->name('backup.')->group(function () {
+            Route::get('/', [BackupController::class, 'index'])->name('index');
+            Route::post('/run', [BackupController::class, 'runBackup'])->name('run');
+            Route::get('/download', [BackupController::class, 'download'])->name('download');
+            Route::delete('/delete', [BackupController::class, 'destroy'])->name('destroy');
+        });
 
         // Daftar Laporan Bulanan
         Route::prefix('dashboard/laporan-bulanan')->name('laporan-bulanan.')->group(function () {

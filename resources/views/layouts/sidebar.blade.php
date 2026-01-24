@@ -106,7 +106,8 @@
                         <div class="text-center me-2 d-flex align-items-center justify-content-center">
                             <i class="material-symbols-rounded opacity-5">school</i>
                         </div>
-                        <span class="nav-link-text text-wrap ms-1">Laporan Penguatan Ideologi Pancasila dan Karakter</span>
+                        <span class="nav-link-text text-wrap ms-1">Laporan Penguatan Ideologi Pancasila dan
+                            Karakter</span>
                     </a>
                 </li>
                 <li class="nav-item {{ request()->routeIs('laporan_lain.*') ? 'active' : '' }}">
@@ -171,6 +172,17 @@
             <li class="nav-item mt-3">
                 <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder text-dark">Pengaturan</h6>
             </li>
+            @if (Auth::user()->role == 'admin')
+                <li class="nav-item {{ request()->routeIs('backup.*') ? 'active' : '' }}">
+                    <a class="nav-link {{ request()->routeIs('backup.*') ? 'active bg-gradient-dark text-white' : 'text-dark' }}"
+                        href="{{ route('backup.index') }}">
+                        <div class="text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="material-symbols-rounded opacity-5">cloud_sync</i>
+                        </div>
+                        <span class="nav-link-text ms-1">Backup Data</span>
+                    </a>
+                </li>
+            @endif
             <li class="nav-item {{ request()->routeIs('profil.edit') ? 'active' : '' }}">
                 <a class="nav-link {{ request()->routeIs('profil.edit') ? 'active bg-gradient-dark text-white' : 'text-dark' }}"
                     href="{{ route('profil.edit') }}">
