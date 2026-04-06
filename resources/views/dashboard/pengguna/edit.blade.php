@@ -49,7 +49,7 @@
                                 <div class="mb-3">
                                     <label for="no_telepon" class="form-label">No. Telepon</label>
                                     <input type="text" class="form-control" id="no_telepon" name="no_telepon"
-                                        value="{{ old('no_telepon', $pengguna->no_telepon) }}" required>
+                                        value="{{ old('no_telepon', $pengguna->no_telepon) }}" placeholder="08xxx atau 62xxx" required>
                                 </div>
                             </div>
                         </div>

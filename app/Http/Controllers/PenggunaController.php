@@ -38,7 +38,8 @@ class PenggunaController extends Controller
             ->of($pengguna)
             ->addIndexColumn()
             ->editColumn('foto', function ($pengguna) {
-                $url = $pengguna->foto ? Storage::url($pengguna->foto) : asset('images/default.jpg');
+                // $url = $pengguna->foto ? Storage::url($pengguna->foto) : asset('images/default.jpg');
+                $url = $pengguna->foto ? asset('storage/' . $pengguna->foto) : asset('images/default.jpg');
                 return '<img src="' . $url . '" alt="Foto" width="50" class="img-thumbnail">';
             })
             ->editColumn('id_wilayah', function ($pengguna) {

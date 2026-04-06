@@ -8,6 +8,7 @@ import Pusher from 'pusher-js'
 
 window.Pusher = Pusher
 
+const baseUrl = document.querySelector('meta[name="base-url"]')?.getAttribute('content') || '';
 window.Echo = new Echo({
     broadcaster: 'reverb',
     key: import.meta.env.VITE_REVERB_APP_KEY,
@@ -15,5 +16,6 @@ window.Echo = new Echo({
     wsPort: import.meta.env.VITE_REVERB_PORT,
     wssPort: import.meta.env.VITE_REVERB_PORT,
     forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
-    enabledTransports: ['ws', 'wss']
+    enabledTransports: ['ws', 'wss'],
+    authEndpoint: baseUrl + '/broadcasting/auth'
 })

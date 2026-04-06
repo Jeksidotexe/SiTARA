@@ -126,7 +126,8 @@
                                         }
                                         if ($mime && strpos($mime, 'image/') === 0) {
                                             $isImage = true;
-                                            $initialSrc = Storage::url($user->foto);
+                                            // $initialSrc = Storage::url($user->foto);
+                                            $initialSrc = asset('storage/' . $user->foto);
                                         }
                                     }
                                 }

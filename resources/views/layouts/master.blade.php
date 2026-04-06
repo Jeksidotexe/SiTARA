@@ -8,6 +8,7 @@
         <link rel="icon" type="image/png" href="{{ asset('images/Logo.png') }}">
         <title> @yield('title') | SiTARA</title>
         <meta name="csrf-token" content="{{ csrf_token() }}">
+        <meta name="base-url" content="{{ url('/') }}">
         @auth
             <meta name="user-id" content="{{ Auth::id() }}">
         @endauth

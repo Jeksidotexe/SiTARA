@@ -21,6 +21,8 @@ use App\Notifications\NotifikasiUntukOperator;
 use App\Models\User;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\NotifikasiLaporanBaruUntukAdmin;
+use App\Mail\LaporanDisetujuiAdminMail;
+use Illuminate\Support\Facades\Mail;
 
 class VerificationController extends Controller
 {
@@ -76,7 +78,7 @@ class VerificationController extends Controller
 
         if ($report->approve()) {
             try {
-                $report->load('operator.wilayah');
+                $report->load('operator.wilayah', 'pimpinan');
 
                 if ($report->operator) {
                     $tanggalFormatted = $report->tanggal_laporan?->isoFormat('D MMMM YYYY') ?? '';
@@ -103,6 +105,20 @@ class VerificationController extends Controller
                             $namaWilayah,
                             $url
                         ));
+                    }
+                }
+
+                $admins = User::where('role', 'admin')->get();
+
+                if ($admins->count() > 0 && $reportConfig) {
+                    $paramName = Str::singular(str_replace('-', '_', $reportType));
+                    // URL untuk Admin melihat detail laporan
+                    $urlAdmin = route($reportConfig['route_base'] . '.show', [$paramName => $report->id_laporan]);
+
+                    foreach ($admins as $admin) {
+                        // Kirim Email
+                        Mail::to($admin->email)
+                            ->queue(new LaporanDisetujuiAdminMail($report, $admin, $urlAdmin));
                     }
                 }
             } catch (\Exception $e) {

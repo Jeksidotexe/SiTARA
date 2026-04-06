@@ -63,10 +63,12 @@ return [
             ]) : [],
 
             'dump' => [
-                'dump_binary_path' => 'C:\xampp\mysql\bin',
-                'use_single_transaction' => true,
-                'timeout' => 600,
-                'add_extra_option' => '--skip-lock-tables --quick',
+                'dump_binary_path' => 'C:\\xampp\\mysql\\bin',
+                'use_single_transaction',
+                'timeout' => 60 * 5,
+                'env' => [
+                    'SYSTEMROOT' => 'C:\\Windows',
+                ],
             ],
 
         ],
