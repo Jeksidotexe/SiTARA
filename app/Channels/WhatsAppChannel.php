@@ -2,7 +2,6 @@
 
 namespace App\Channels;
 
-use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -23,7 +22,7 @@ class WhatsAppChannel
 
         if (empty($to)) {
             $userId = $notifiable->id_users ?? $notifiable->id ?? 'Unknown';
-            Log::warning("Gagal kirim WA: No Telepon user {$userId} kosong.");
+            Log::warning("Gagal mengirim pesan: No Telepon user {$userId} kosong.");
             return;
         }
 
