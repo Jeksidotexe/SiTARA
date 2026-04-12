@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="id">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Offline | SiTARA</title>
+        <meta name="theme-color" content="#344767" />
+        <style>
+            /* Menggunakan font bawaan perangkat agar tetap rapi saat offline */
+            :root {
+                --primary-color: #344767;
+                --bg-color: #f8f9fa;
+                --card-bg: #ffffff;
+                --text-main: #344767;
+                --text-muted: #67748e;
+            }
+
+            body {
+                margin: 0;
+                padding: 0;
+                font-family:
+                    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                    Helvetica, Arial, sans-serif;
+                background-color: var(--bg-color);
+                color: var(--text-main);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 100vh;
+                text-align: center;
+            }
+
+            .offline-container {
+                background: var(--card-bg);
+                padding: 3rem 2rem;
+                border-radius: 1rem;
+                box-shadow:
+                    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+                    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+                max-width: 400px;
+                width: 85%;
+            }
+
+            .icon-wrapper {
+                width: 100px;
+                height: 100px;
+                background: var(--bg-color);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto 1.5rem;
+                box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+            }
+
+            /* Ikon SVG Inline agar tidak butuh koneksi internet */
+            .icon-wrapper svg {
+                width: 45px;
+                height: 45px;
+                fill: var(--text-muted);
+            }
+
+            h1 {
+                font-size: 1.5rem;
+                font-weight: 700;
+                margin: 0 0 0.5rem;
+                letter-spacing: -0.5px;
+            }
+
+            p {
+                color: var(--text-muted);
+                font-size: 0.95rem;
+                line-height: 1.6;
+                margin: 0 0 2rem;
+            }
+
+            .btn-retry {
+                background: linear-gradient(195deg, #42424a 0%, #191919 100%);
+                color: #ffffff;
+                border: none;
+                padding: 0.75rem 1.5rem;
+                font-size: 0.875rem;
+                font-weight: 600;
+                border-radius: 0.5rem;
+                cursor: pointer;
+                transition: all 0.2s ease-in-out;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                width: 100%;
+            }
+
+            .btn-retry:hover {
+                box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+                transform: translateY(-2px);
+            }
+
+            .btn-retry:active {
+                transform: translateY(0);
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .logo-text {
+                font-weight: 900;
+                color: var(--primary-color);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="offline-container">
+            <div class="icon-wrapper">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M23.64 7c-.45-.34-4.93-4-11.64-4-1.5 0-2.89.19-4.15.48L18.18 13.8 23.64 7zm-6.6 8.22L3.27 1.44 2 2.72l2.05 2.06C1.91 5.76.59 6.82.36 7l11.63 14.49.01.01.01-.01 3.9-4.86 3.32 3.32 1.27-1.27-3.46-3.46z"
+                    />
+                </svg>
+            </div>
+
+            <h1>Koneksi Terputus</h1>
+            <p>
+                Aplikasi <span class="logo-text">SiTARA</span> tidak dapat
+                menjangkau server. Pastikan perangkat Anda terhubung ke internet
+                atau jaringan Wi-Fi, lalu coba lagi.
+            </p>
+
+            <button class="btn-retry" onclick="window.location.reload()">
+                Coba Lagi
+            </button>
+        </div>
+    </body>
+</html>

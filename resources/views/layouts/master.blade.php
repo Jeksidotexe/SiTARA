@@ -9,6 +9,23 @@
         <title> @yield('title') | SiTARA</title>
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <meta name="base-url" content="{{ url('/') }}">
+        <link rel="manifest" href="{{ asset('manifest.json') }}">
+        <meta name="theme-color" content="#344767">
+        <link rel="apple-touch-icon" href="{{ asset('images/icons/icon-192x192.png') }}">
+        <script>
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                    navigator.serviceWorker.register("{{ asset('sw.js') }}", {
+                            scope: "{{ asset('/') }}"
+                        })
+                        .then(function(registration) {
+                            console.log('PWA ServiceWorker terdaftar dengan sukses!');
+                        }, function(err) {
+                            console.error('PWA ServiceWorker gagal didaftarkan: ', err);
+                        });
+                });
+            }
+        </script>
         @auth
             <meta name="user-id" content="{{ Auth::id() }}">
         @endauth
@@ -136,7 +153,8 @@
                             <form id="formPengaturanKop" enctype="multipart/form-data">
                                 @csrf
                                 <div class="modal-body">
-                                    <div id="kop-error-container" class="alert alert-danger alert-container" role="alert">
+                                    <div id="kop-error-container" class="alert alert-danger alert-container"
+                                        role="alert">
                                     </div>
                                     <p class="text-sm">Anda mengelola pengaturan untuk wilayah:
                                         <strong id="nama-wilayah-modal-kop">Memuat...</strong>

@@ -37,7 +37,7 @@
 
                     <tr>
                         <td align="center" style="padding: 20px 0;">
-                            <img src="https://i.ibb.co.com/Szy4sRP/Logo.png" alt="Logo" width="76"
+                            <img src="https://i.ibb.co.com/dJHqt2yc/Logo.png" alt="Logo" width="76"
                                 style="display: block; width: 76px; height: auto;">
                             <strong>Pemerintah Provinsi Kalimantan Barat</strong>
                         </td>
