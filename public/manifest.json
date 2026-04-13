@@ -4,7 +4,7 @@
     "description": "Aplikasi Pelaporan",
     "start_url": "./",
     "display": "fullscreen",
-    "background_color": "#f8f9fa",
+    "background_color": "#262626",
     "theme_color": "#262626",
     "orientation": "portrait-primary",
     "icons": [
