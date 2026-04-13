@@ -47,90 +47,6 @@
             margin-left: 10px;
         }
 
-        .neon-marker {
-            position: relative;
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            border: 2px solid #fff;
-            box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
-        }
-
-        .neon-marker::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            box-shadow: 0 0 10px 3px #fff;
-            opacity: 0.8;
-        }
-
-        .neon-marker::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background-color: transparent;
-        }
-
-        .marker-aman {
-            background-color: #00e676;
-        }
-
-        .marker-aman::before {
-            box-shadow: 0 0 12px 4px #00e676;
-        }
-
-        .marker-siaga {
-            background-color: #ffeb3b;
-        }
-
-        .marker-siaga::before {
-            box-shadow: 0 0 12px 4px #ffeb3b;
-        }
-
-        .marker-siaga::after {
-            animation: pulse-ring 1.5s ease-out infinite;
-            border: 2px solid #ffeb3b;
-        }
-
-        .marker-bahaya {
-            background-color: #f44336;
-        }
-
-        .marker-bahaya::before {
-            box-shadow: 0 0 12px 4px #f44336;
-        }
-
-        .marker-bahaya::after {
-            animation: pulse-ring 1.5s ease-out infinite;
-            border: 2px solid #f44336;
-        }
-
-        @keyframes pulse-ring {
-            0% {
-                transform: translate(-50%, -50%) scale(0.5);
-                opacity: 0.8;
-            }
-
-            80% {
-                transform: translate(-50%, -50%) scale(2);
-                opacity: 0;
-            }
-
-            100% {
-                opacity: 0;
-            }
-        }
-
         .leaflet-div-icon {
             background: none !important;
             border: none !important;
@@ -229,9 +145,17 @@
     </style>
     <style>
         @keyframes pulse-red {
-            0% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(244, 67, 54, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0); }
+            0% {
+                box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(244, 67, 54, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(244, 67, 54, 0);
+            }
         }
 
         .pulse-animation.bg-gradient-danger {
@@ -371,7 +295,7 @@
                         </span>
                     </div>
                     <p class="text-sm text-muted mt-1 mb-0">
-                        Real-time monitoring situasi daerah
+                        Real-time heatmap monitoring situasi daerah
                     </p>
                 </div>
                 <div class="card-body p-3">
@@ -428,10 +352,14 @@
 @endsection
 
 @push('scripts')
+    {{-- Leaflet Heatmap Plugin --}}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.js"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             let map;
             let markersLayer;
+            let heatLayer;
             let myLocationMarker = null;
             const mapStatusBadge = document.getElementById('map-status-badge');
 
@@ -576,20 +504,6 @@
                 }
             });
 
-            function getWilayahIcon(status) {
-                let statusClass = 'marker-default';
-                if (status === 'Aman') statusClass = 'marker-aman';
-                else if (status === 'Siaga') statusClass = 'marker-siaga';
-                else if (status === 'Bahaya') statusClass = 'marker-bahaya';
-
-                return L.divIcon({
-                    className: 'leaflet-div-icon',
-                    html: `<div class="neon-marker ${statusClass}"></div>`,
-                    iconSize: [14, 14],
-                    iconAnchor: [7, 7]
-                });
-            }
-
             function getBadgeClass(status) {
                 if (status === 'Aman') return 'bg-gradient-success';
                 if (status === 'Siaga') return 'bg-gradient-warning';
@@ -602,7 +516,6 @@
             function loadMapData() {
                 if (dataGagalDimuat) return;
 
-                // (Optional) Reset tampilan loading jika dipanggil ulang
                 document.getElementById('wilayah-loading').classList.remove('d-none');
                 document.getElementById('wilayah-table-container').classList.add('d-none');
 
@@ -624,6 +537,7 @@
                         if (data.error) throw new Error(data.error);
 
                         markersLayer.clearLayers();
+                        if (heatLayer) map.removeLayer(heatLayer); // Hapus layer heatmap lama
                         markerReferences = {};
 
                         if (data.length === 0) {
@@ -639,6 +553,7 @@
                         }
 
                         let bounds = [];
+                        let heatData = []; // Array untuk menampung data heatmap
 
                         data.forEach(wilayah => {
                             if (wilayah.lat && wilayah.lng) {
@@ -646,9 +561,19 @@
                                 const lng = parseFloat(wilayah.lng);
 
                                 if (!isNaN(lat) && !isNaN(lng)) {
-                                    const icon = getWilayahIcon(wilayah.status_wilayah);
-                                    const marker = L.marker([lat, lng], {
-                                        icon: icon
+                                    // Logika intensitas Heatmap berdasarkan status
+                                    let intensity = 0.4; // Default aman dinaikkan sedikit
+                                    if (wilayah.status_wilayah === 'Siaga') intensity = 0.7;
+                                    else if (wilayah.status_wilayah === 'Bahaya') intensity = 1.0;
+
+                                    heatData.push([lat, lng, intensity]);
+
+                                    const marker = L.circleMarker([lat, lng], {
+                                        radius: 15, // Area klik
+                                        color: 'transparent',
+                                        fillColor: 'transparent',
+                                        fillOpacity: 0,
+                                        opacity: 0
                                     });
 
                                     const popupHtml = `
@@ -678,6 +603,21 @@
                             }
                         });
 
+                        // Konfigurasi Layer Heatmap
+                        if (heatData.length > 0) {
+                            heatLayer = L.heatLayer(heatData, {
+                                radius: 40,
+                                blur: 30,
+                                maxZoom: 8,
+                                minOpacity: 0.6,
+                                gradient: {
+                                    0.4: '#00e676', // Aman
+                                    0.7: '#ffeb3b', // Siaga
+                                    1.0: '#f44336' // Bahaya
+                                }
+                            }).addTo(map);
+                        }
+
                         if (wilayahTable) {
                             wilayahTable.clear().rows.add(data).draw();
                             wilayahTable.columns.adjust();
@@ -701,43 +641,27 @@
                             else if (item.status_wilayah === 'Bahaya') countBahaya++;
                         });
 
-                        // 2. Update Badge UI
                         if (mapStatusBadge) {
-                            // Reset kelas animasi agar tidak menumpuk
                             mapStatusBadge.classList.remove('pulse-animation');
 
-                            // -- KONDISI BAHAYA (Dominan) --
                             if (countBahaya >= countSiaga && countBahaya >= countAman && countBahaya > 0) {
                                 mapStatusBadge.innerHTML =
                                     '<i class="fas fa-exclamation-circle me-1"></i> Situasi Bahaya';
                                 mapStatusBadge.className = 'badge badge-sm bg-gradient-danger shadow-danger';
-
-                                // Tooltip: Info detail saat di-hover
                                 mapStatusBadge.title = `Terdapat ${countBahaya} wilayah dalam status Bahaya`;
-
-                                // Efek Visual: Berdenyut
                                 mapStatusBadge.classList.add('pulse-animation');
-                            }
-                            // -- KONDISI SIAGA (Dominan) --
-                            else if (countSiaga >= countAman && countSiaga > countBahaya) {
+                            } else if (countSiaga >= countAman && countSiaga > countBahaya) {
                                 mapStatusBadge.innerHTML =
                                     '<i class="fas fa-exclamation-triangle me-1"></i> Situasi Siaga';
                                 mapStatusBadge.className = 'badge badge-sm bg-gradient-warning shadow-warning';
-
-                                // Tooltip
                                 mapStatusBadge.title = `Terdapat ${countSiaga} wilayah dalam status Siaga`;
-                            }
-                            // -- KONDISI AMAN / KONDUSIF (Dominan) --
-                            else {
+                            } else {
                                 mapStatusBadge.innerHTML =
                                     '<i class="fas fa-check-circle me-1"></i> Situasi Kondusif';
                                 mapStatusBadge.className = 'badge badge-sm bg-gradient-success';
-
-                                // Tooltip
                                 mapStatusBadge.title = `Seluruh wilayah terpantau aman (${countAman} wilayah)`;
                             }
 
-                            // Re-inisialisasi Tooltip Bootstrap agar title muncul cantik
                             mapStatusBadge.setAttribute('data-bs-toggle', 'tooltip');
                             try {
                                 var tooltipTriggerList = [].slice.call(document.querySelectorAll(
@@ -745,9 +669,7 @@
                                 tooltipTriggerList.map(function(tooltipTriggerEl) {
                                     return new bootstrap.Tooltip(tooltipTriggerEl);
                                 });
-                            } catch (e) {
-                                // Abaikan jika bootstrap tooltip belum load
-                            }
+                            } catch (e) {}
                         }
                     })
                     .catch(error => {
@@ -967,29 +889,22 @@
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Cek apakah moment.js tersedia (sudah ada di master.blade.php)
             if (typeof moment !== 'undefined') {
-                // Set locale ke Indonesia
                 moment.locale('id');
 
                 function updateTime() {
                     const now = moment();
 
-                    // Update Jam (Format: 14:30:59)
                     const timeString = now.format('HH:mm:ss');
                     const clockElement = document.getElementById('realtime-clock');
                     if (clockElement) clockElement.innerText = timeString;
 
-                    // Update Tanggal (Format: Senin, 25 November 2024)
                     const dateString = now.format('dddd, D MMMM YYYY');
                     const dateElement = document.getElementById('realtime-date');
                     if (dateElement) dateElement.innerText = dateString;
                 }
 
-                // Jalankan fungsi update setiap 1 detik
                 setInterval(updateTime, 1000);
-
-                // Jalankan segera saat load agar tidak ada delay tampilan
                 updateTime();
             } else {
                 console.error('Moment.js tidak ditemukan. Pastikan sudah di-load di master layout.');
