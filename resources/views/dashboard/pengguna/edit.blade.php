@@ -49,7 +49,8 @@
                                 <div class="mb-3">
                                     <label for="no_telepon" class="form-label">No. Telepon</label>
                                     <input type="text" class="form-control" id="no_telepon" name="no_telepon"
-                                        value="{{ old('no_telepon', $pengguna->no_telepon) }}" placeholder="08xxx atau 62xxx" required>
+                                        value="{{ old('no_telepon', $pengguna->no_telepon) }}"
+                                        placeholder="08xxx atau 62xxx" required>
                                 </div>
                             </div>
                         </div>
@@ -149,24 +150,6 @@
                             <p class="custom-file-upload-info" id="fileInfoText_edit">
                                 Maks. 2 MB | Format: JPG, PNG, GIF | *Kosongkan jika tidak ingin mengubah foto.*
                             </p>
-                            @php
-                                $isImage = false;
-                                $initialSrc = '#';
-                                if ($pengguna->foto) {
-                                    $fullPath = storage_path('app/public/' . $pengguna->foto);
-                                    if (file_exists($fullPath)) {
-                                        try {
-                                            $mime = mime_content_type($fullPath);
-                                        } catch (\Exception $e) {
-                                            $mime = null;
-                                        }
-                                        if ($mime && strpos($mime, 'image/') === 0) {
-                                            $isImage = true;
-                                            $initialSrc = Storage::url($pengguna->foto);
-                                        }
-                                    }
-                                }
-                            @endphp
                             <div id="foto-preview-wrapper" class="mt-3 {{ $isImage ? 'has-image-preview' : '' }}"
                                 style="{{ $isImage ? 'display: block;' : 'display: none;' }}"
                                 data-initial-src="{{ $initialSrc }}">
@@ -175,7 +158,9 @@
                                     class="img-thumbnail" style="max-height: 150px;">
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-sm btn-dark bg-gradient-dark"><li class="fa fa-save"></li> Simpan Perubahan</button>
+                        <button type="submit" class="btn btn-sm btn-dark bg-gradient-dark">
+                            <li class="fa fa-save"></li> Simpan Perubahan
+                        </button>
                     </form>
                 </div>
             </div>

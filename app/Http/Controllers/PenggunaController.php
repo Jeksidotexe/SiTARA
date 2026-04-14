@@ -142,7 +142,27 @@ class PenggunaController extends Controller
     {
         $pengguna = User::findOrFail($id);
         $wilayah = Wilayah::all();
-        return view('dashboard.pengguna.edit', compact('pengguna', 'wilayah'));
+
+        $isImage = false;
+        $initialSrc = '#';
+
+        if ($pengguna->foto && Storage::disk('public')->exists($pengguna->foto)) {
+
+            $fullPath = Storage::disk('public')->path($pengguna->foto);
+
+            try {
+                // Fungsi bawaan PHP untuk mengecek tipe file
+                $mime = mime_content_type($fullPath);
+
+                // Pastikan file tersebut adalah gambar
+                if ($mime && str_starts_with($mime, 'image/')) {
+                    $isImage = true;
+                    $initialSrc = asset('storage/' . $pengguna->foto);
+                }
+            } catch (\Exception $e) {
+            }
+        }
+        return view('dashboard.pengguna.edit', compact('pengguna', 'wilayah', 'isImage', 'initialSrc'));
     }
 
     /**
