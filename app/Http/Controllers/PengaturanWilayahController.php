@@ -6,19 +6,17 @@ use App\Models\Wilayah;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 class PengaturanWilayahController extends Controller
 {
-    // Path dasar di 'storage/app/public/'
-    private $path_kop = 'wilayah/kop_surat';
-    private $path_ttd = 'wilayah/tanda_tangan';
-    private $disk = 'public';
+    // Path diletakkan di dalam 'storage' agar tersimpan di public/storage/wilayah/...
+    private $path_kop = 'storage/wilayah/kop_surat';
+    private $path_ttd = 'storage/wilayah/tanda_tangan';
 
     /**
-     * Helper untuk meng-handle upload file, menghapus yang lama, dan mengembalikan path baru.
+     * Helper untuk meng-handle upload file, memindahkannya langsung ke folder public fisik.
      */
     private function handleUpload(Request $request, Wilayah $wilayah, $fileField, $oldPath, $storagePath)
     {
@@ -26,19 +24,28 @@ class PengaturanWilayahController extends Controller
             return $oldPath;
         }
 
+        // 1. Hapus file lama secara fisik (jika ada) untuk menghindari penumpukan file
         if ($oldPath) {
-            Storage::disk($this->disk)->delete($oldPath);
+            $oldFile = Str::startsWith($oldPath, 'storage/') ? public_path($oldPath) : public_path('storage/' . $oldPath);
+            if (file_exists($oldFile) && is_file($oldFile)) {
+                @unlink($oldFile);
+            }
         }
 
+        // 2. Siapkan file baru
         $file = $request->file($fileField);
 
+        // Membersihkan nama wilayah dari spasi dan karakter aneh (misal: "Kota Pontianak" jadi "kota_pontianak")
         $saneNamaWilayah = Str::slug($wilayah->nama_wilayah, '_');
 
+        // Nama file diatur murni berdasarkan nama wilayah dan jenis inputannya
         $fileName = $saneNamaWilayah . '_' . $fileField . '.' . $file->getClientOriginalExtension();
 
-        $newPath = $file->storeAs($storagePath, $fileName, $this->disk);
+        // 3. Pindahkan file LANGSUNG ke direktori fisik public
+        $file->move(public_path($storagePath), $fileName);
 
-        return $newPath;
+        // 4. Simpan path yang sudah disesuaikan ke database
+        return $storagePath . '/' . $fileName;
     }
 
     /**
@@ -53,10 +60,23 @@ class PengaturanWilayahController extends Controller
             return response()->json(['error' => 'Wilayah tidak ditemukan.'], 404);
         }
 
+        // Otomatis menyesuaikan path jika data lama di database tidak memiliki prefix "storage/"
+        $kopUrl = null;
+        if ($wilayah->kop_surat) {
+            $pathKop = Str::startsWith($wilayah->kop_surat, 'storage/') ? $wilayah->kop_surat : 'storage/' . $wilayah->kop_surat;
+            $kopUrl = asset($pathKop);
+        }
+
+        $ttdUrl = null;
+        if ($wilayah->tanda_tangan) {
+            $pathTtd = Str::startsWith($wilayah->tanda_tangan, 'storage/') ? $wilayah->tanda_tangan : 'storage/' . $wilayah->tanda_tangan;
+            $ttdUrl = asset($pathTtd);
+        }
+
         return response()->json([
             'nama_wilayah' => $wilayah->nama_wilayah,
-            'kop_surat_url' => $wilayah->kop_surat ? Storage::url($wilayah->kop_surat) : null,
-            'tanda_tangan_url' => $wilayah->tanda_tangan ? Storage::url($wilayah->tanda_tangan) : null,
+            'kop_surat_url' => $kopUrl,
+            'tanda_tangan_url' => $ttdUrl,
         ]);
     }
 
@@ -74,8 +94,8 @@ class PengaturanWilayahController extends Controller
 
         // Validasi
         $validator = Validator::make($request->all(), [
-            'kop_surat' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Maks 2MB
-            'tanda_tangan' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Maks 2MB
+            'kop_surat' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'tanda_tangan' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ], [
             '*.image' => 'File harus berupa gambar.',
             '*.mimes' => 'Format gambar harus: jpeg, png, jpg',
@@ -88,9 +108,9 @@ class PengaturanWilayahController extends Controller
 
         try {
             $updateData = [];
-            $updatedMessages = []; // [BARU] Kita akan lacak apa yang di-update
+            $updatedMessages = [];
 
-            // Proses upload Kop Surat
+            // Upload Kop Surat
             if ($request->hasFile('kop_surat')) {
                 $updateData['kop_surat'] = $this->handleUpload(
                     $request,
@@ -99,10 +119,10 @@ class PengaturanWilayahController extends Controller
                     $wilayah->kop_surat,
                     $this->path_kop
                 );
-                $updatedMessages[] = 'Kop Surat'; // [BARU] Tandai
+                $updatedMessages[] = 'Kop Surat';
             }
 
-            // Proses upload Tanda Tangan
+            // Upload Tanda Tangan
             if ($request->hasFile('tanda_tangan')) {
                 $updateData['tanda_tangan'] = $this->handleUpload(
                     $request,
@@ -111,24 +131,34 @@ class PengaturanWilayahController extends Controller
                     $wilayah->tanda_tangan,
                     $this->path_ttd
                 );
-                $updatedMessages[] = 'Tanda Tangan'; // [BARU] Tandai
+                $updatedMessages[] = 'Tanda Tangan';
             }
 
-            // [LOGIKA PESAN BARU]
-            $message = 'Tidak ada perubahan yang disimpan.'; // Pesan default jika tidak ada file
+            $message = 'Tidak ada perubahan yang disimpan.';
 
-            // Hanya update database jika ada data baru
+            // Update Database
             if (!empty($updateData)) {
                 $wilayah->update($updateData);
-
-                // Buat pesan dinamis
                 $message = implode(' dan ', $updatedMessages) . ' berhasil diperbarui.';
             }
 
+            // Format URL response dengan Anti-Cache bawaan untuk memperbarui preview otomatis
+            $kopUrl = null;
+            if ($wilayah->kop_surat) {
+                $pathKop = Str::startsWith($wilayah->kop_surat, 'storage/') ? $wilayah->kop_surat : 'storage/' . $wilayah->kop_surat;
+                $kopUrl = asset($pathKop) . '?t=' . time();
+            }
+
+            $ttdUrl = null;
+            if ($wilayah->tanda_tangan) {
+                $pathTtd = Str::startsWith($wilayah->tanda_tangan, 'storage/') ? $wilayah->tanda_tangan : 'storage/' . $wilayah->tanda_tangan;
+                $ttdUrl = asset($pathTtd) . '?t=' . time();
+            }
+
             return response()->json([
-                'message' => $message, // <-- Kirim pesan dinamis
-                'kop_surat_url' => $wilayah->kop_surat ? Storage::url($wilayah->kop_surat) : null,
-                'tanda_tangan_url' => $wilayah->tanda_tangan ? Storage::url($wilayah->tanda_tangan) : null,
+                'message' => $message,
+                'kop_surat_url' => $kopUrl,
+                'tanda_tangan_url' => $ttdUrl,
             ]);
         } catch (\Exception $e) {
             Log::error('Error updating wilayah settings: ' . $e->getMessage());
