@@ -133,6 +133,41 @@ class LaporanSituasiDaerahController extends Controller
             return redirect()->back()->with('error', 'Data wilayah tidak ditemukan pada operator ini.');
         }
 
+        // Pengecekan Kop Surat
+        $kopSuratPath = null;
+        if ($wilayah->kop_surat && file_exists(public_path($wilayah->kop_surat))) {
+            $kopSuratPath = public_path($wilayah->kop_surat);
+        }
+
+        // Pengecekan Tanda Tangan
+        $tandaTanganPath = null;
+        if ($wilayah->tanda_tangan && file_exists(public_path($wilayah->tanda_tangan))) {
+            $tandaTanganPath = public_path($wilayah->tanda_tangan);
+        }
+
+        // Pengecekan Ekstensi dan Eksistensi Gambar Lampiran per Kategori (A-H)
+        $lampiranValidPaths = [];
+        $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp'];
+
+        foreach ($this->fileFields as $key) {
+            $files = $laporan->{'file_' . $key};
+            $validImages = [];
+
+            if (is_array($files)) {
+                foreach ($files as $file) {
+                    $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+                    if (in_array($extension, $imageExtensions)) {
+                        $fullPath = public_path($file);
+                        if (file_exists($fullPath)) {
+                            $validImages[] = $fullPath;
+                        }
+                    }
+                }
+            }
+            $lampiranValidPaths[$key] = $validImages;
+        }
+        // ====================================================================
+
         $reports = collect([$laporan]);
         $filters = [
             'tipe_laporan' => 'Situasi Daerah',
@@ -143,9 +178,6 @@ class LaporanSituasiDaerahController extends Controller
         $sectionKeys = $this->fileFields;
         $sectionTitles = $this->fieldTitles;
 
-        $fileFields = $this->fileFields;
-        $fieldTitles = $this->fieldTitles;
-
         $pdf = Pdf::loadView('dashboard.laporan_situasi_daerah.preview_pdf', compact(
             'laporan',
             'reports',
@@ -153,8 +185,9 @@ class LaporanSituasiDaerahController extends Controller
             'filters',
             'sectionKeys',
             'sectionTitles',
-            'fileFields',
-            'fieldTitles'
+            'kopSuratPath',
+            'tandaTanganPath',
+            'lampiranValidPaths'
         ));
 
         $pdf->setPaper('A4', 'portrait');
@@ -181,7 +214,7 @@ class LaporanSituasiDaerahController extends Controller
 
         // [PERBAIKAN] Mulai query builder
         $query = LaporanSituasiDaerah::with('operator');
-            // ->latest('id_laporan');
+        // ->latest('id_laporan');
 
         // [PERBAIKAN] Terapkan filter berdasarkan Role Operator
         // Route ini dilindungi oleh middleware 'role:operator' di web.php

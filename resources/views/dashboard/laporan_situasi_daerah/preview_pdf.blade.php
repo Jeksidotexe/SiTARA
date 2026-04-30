@@ -124,7 +124,6 @@
 
         .image-gallery {
             margin-top: 0;
-            /* page-break-inside: avoid; */
             padding-left: 0;
         }
 
@@ -172,9 +171,9 @@
     @forelse ($reports as $report)
         <div class="report-page">
 
-            @if ($wilayah->kop_surat && Storage::disk('public')->exists($wilayah->kop_surat))
+            @if ($kopSuratPath)
                 <div class="kop-surat">
-                    <img src="{{ public_path('storage/' . $wilayah->kop_surat) }}" alt="Kop Surat">
+                    <img src="{{ $kopSuratPath }}" alt="Kop Surat">
                 </div>
             @else
                 <div class="kop-surat" style="text-align: center; padding: 20px; border: 1px dashed red;">
@@ -196,13 +195,12 @@
                 @foreach ($sectionKeys as $key)
                     @php
                         $narasi = $report->{'narasi_' . $key};
-                        $files = $report->{'file_' . $key};
                     @endphp
 
                     <div class="report-section">
                         <h5>{{ $sectionTitles[$key] }}</h5>
 
-                        @if (empty($narasi) && (empty($files) || count($files) == 0))
+                        @if (empty($narasi) && count($lampiranValidPaths[$key]) == 0)
                             <p class="nihil">(NIHIL)</p>
                         @else
                             @if (!empty($narasi))
@@ -211,28 +209,13 @@
                                 </div>
                             @endif
 
-                            @if (!empty($files) && count($files) > 0)
+                            @if (count($lampiranValidPaths[$key]) > 0)
                                 <div class="lampiran">
-                                    @php
-                                        $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp'];
-                                        $images = [];
-
-                                        foreach ($files as $file) {
-                                            $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
-                                            if (in_array($extension, $imageExtensions)) {
-                                                $images[] = $file;
-                                            }
-                                        }
-                                    @endphp
-                                    @if (count($images) > 0)
-                                        <div class="image-gallery">
-                                            @foreach ($images as $img)
-                                                @if (Storage::disk('public')->exists(str_replace('storage/', '', $img)))
-                                                    <img src="{{ public_path($img) }}">
-                                                @endif
-                                            @endforeach
-                                        </div>
-                                    @endif
+                                    <div class="image-gallery">
+                                        @foreach ($lampiranValidPaths[$key] as $imgPath)
+                                            <img src="{{ $imgPath }}">
+                                        @endforeach
+                                    </div>
                                 </div>
                             @endif
                         @endif
@@ -250,8 +233,8 @@
             </div>
 
             <div class="signature">
-                @if ($wilayah->tanda_tangan && Storage::disk('public')->exists($wilayah->tanda_tangan))
-                    <img src="{{ public_path('storage/' . $wilayah->tanda_tangan) }}" alt="Tanda Tangan">
+                @if ($tandaTanganPath)
+                    <img src="{{ $tandaTanganPath }}" alt="Tanda Tangan">
                 @else
                     <div style="text-align: center; padding: 20px; border: 1px dashed red; height: 100px;">
                         (Tanda Tangan belum di-upload)
@@ -263,9 +246,10 @@
 
     @empty
         <div class="report-page">
-            @if ($wilayah->kop_surat && Storage::disk('public')->exists($wilayah->kop_surat))
+
+            @if ($kopSuratPath)
                 <div class="kop-surat">
-                    <img src="{{ public_path('storage/' . $wilayah->kop_surat) }}" alt="Kop Surat">
+                    <img src="{{ $kopSuratPath }}" alt="Kop Surat">
                 </div>
             @endif
 
@@ -283,9 +267,9 @@
                 </p>
             </div>
 
-            @if ($wilayah->tanda_tangan && Storage::disk('public')->exists($wilayah->tanda_tangan))
+            @if ($tandaTanganPath)
                 <div class="signature">
-                    <img src="{{ public_path('storage/' . $wilayah->tanda_tangan) }}" alt="Tanda Tangan">
+                    <img src="{{ $tandaTanganPath }}" alt="Tanda Tangan">
                 </div>
             @endif
         </div>

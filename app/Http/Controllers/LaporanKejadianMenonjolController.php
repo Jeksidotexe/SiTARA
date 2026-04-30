@@ -131,6 +131,41 @@ class LaporanKejadianMenonjolController extends Controller
             return redirect()->back()->with('error', 'Data wilayah tidak ditemukan pada operator ini.');
         }
 
+        // Pengecekan Kop Surat
+        $kopSuratPath = null;
+        if ($wilayah->kop_surat && file_exists(public_path($wilayah->kop_surat))) {
+            $kopSuratPath = public_path($wilayah->kop_surat);
+        }
+
+        // Pengecekan Tanda Tangan
+        $tandaTanganPath = null;
+        if ($wilayah->tanda_tangan && file_exists(public_path($wilayah->tanda_tangan))) {
+            $tandaTanganPath = public_path($wilayah->tanda_tangan);
+        }
+
+        // Pengecekan Ekstensi dan Eksistensi Gambar Lampiran per Kategori (A-H)
+        $lampiranValidPaths = [];
+        $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp'];
+
+        foreach ($this->fileFields as $key) {
+            $files = $laporan->{'file_' . $key};
+            $validImages = [];
+
+            if (is_array($files)) {
+                foreach ($files as $file) {
+                    $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+                    if (in_array($extension, $imageExtensions)) {
+                        $fullPath = public_path($file);
+                        if (file_exists($fullPath)) {
+                            $validImages[] = $fullPath;
+                        }
+                    }
+                }
+            }
+            $lampiranValidPaths[$key] = $validImages;
+        }
+        // ====================================================================
+
         $reports = collect([$laporan]);
         $filters = [
             'tipe_laporan' => 'Harian Kejadian Menonjol',
@@ -152,7 +187,10 @@ class LaporanKejadianMenonjolController extends Controller
             'sectionKeys',
             'sectionTitles',
             'fileFields',
-            'fieldTitles'
+            'fieldTitles',
+            'kopSuratPath',
+            'tandaTanganPath',
+            'lampiranValidPaths'
         ));
 
         $pdf->setPaper('A4', 'portrait');
@@ -178,7 +216,7 @@ class LaporanKejadianMenonjolController extends Controller
         $user = Auth::user();
 
         $query = LaporanKejadianMenonjol::with('operator');
-            // ->latest('id_laporan');
+        // ->latest('id_laporan');
 
         $query->where('id_operator', $user->id_users);
 
